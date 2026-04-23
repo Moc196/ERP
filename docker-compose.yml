@@ -1,0 +1,45 @@
+
+services:
+  # ─── Backend API ─────────────────────────────────────────────
+  api:
+    build:
+      context: ./ErpBackend
+      dockerfile: Dockerfile
+    container_name: erp_api
+    ports:
+      - "5013:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/app.db
+      - Jwt__Key=SuperSecretKeyForVibeCoding2024!
+      - Jwt__Issuer=ErpVibeApp
+      - Jwt__Audience=ErpVibeUsers
+    volumes:
+      - erp_data:/app/data
+      - erp_logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - erp_network
+
+  # ─── React Frontend ───────────────────────────────────────────
+  frontend:
+    build:
+      context: ./ErpFrontend
+      dockerfile: Dockerfile
+    container_name: erp_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - erp_network
+
+volumes:
+  erp_data:
+  erp_logs:
+
+networks:
+  erp_network:
+    driver: bridge
