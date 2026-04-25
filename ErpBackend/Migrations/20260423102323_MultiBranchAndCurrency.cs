@@ -1,5 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -41,7 +43,7 @@ namespace ErpBackend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(nullable: false),
                     Address = table.Column<string>(nullable: false),
                     Phone = table.Column<string>(nullable: false)
@@ -56,7 +58,7 @@ namespace ErpBackend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CurrencyCode = table.Column<string>(nullable: false),
                     Rate = table.Column<decimal>(nullable: false),
                     Date = table.Column<DateTime>(nullable: false)
@@ -96,7 +98,7 @@ namespace ErpBackend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProductId = table.Column<int>(nullable: false),
                     FromBranchId = table.Column<int>(nullable: false),
                     ToBranchId = table.Column<int>(nullable: false),
