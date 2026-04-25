@@ -26,7 +26,7 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var branchId = _httpContextAccessor.HttpContext?.User?.FindFirstValue("BranchId");
+            var branchId = _httpContextAccessor.HttpContext?.User?.FindFirstValue("branchId");
             return int.TryParse(branchId, out var id) ? id : null;
         }
     }
