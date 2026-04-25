@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -27,14 +27,12 @@ namespace ErpBackend.Migrations
             migrationBuilder.AddColumn<decimal>(
                 name: "ExchangeRate",
                 table: "Invoices",
-                type: "TEXT",
                 nullable: false,
                 defaultValue: 0m);
 
             migrationBuilder.AddColumn<decimal>(
                 name: "TotalAmountVND",
                 table: "Invoices",
-                type: "TEXT",
                 nullable: false,
                 defaultValue: 0m);
 
@@ -60,8 +58,8 @@ namespace ErpBackend.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     CurrencyCode = table.Column<string>(type: "TEXT", nullable: false),
-                    Rate = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Date = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Rate = table.Column<decimal>(nullable: false),
+                    Date = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -104,7 +102,7 @@ namespace ErpBackend.Migrations
                     ToBranchId = table.Column<int>(type: "INTEGER", nullable: false),
                     Quantity = table.Column<int>(type: "INTEGER", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {

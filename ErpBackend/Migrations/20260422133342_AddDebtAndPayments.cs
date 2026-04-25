@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -21,7 +21,6 @@ namespace ErpBackend.Migrations
             migrationBuilder.AddColumn<decimal>(
                 name: "PaidAmount",
                 table: "Invoices",
-                type: "TEXT",
                 nullable: false,
                 defaultValue: 0m);
 
@@ -32,8 +31,8 @@ namespace ErpBackend.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     InvoiceId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Amount = table.Column<decimal>(type: "TEXT", nullable: false),
-                    PaymentDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Amount = table.Column<decimal>(nullable: false),
+                    PaymentDate = table.Column<DateTime>(nullable: false),
                     PaymentMethod = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>

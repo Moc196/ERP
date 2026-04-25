@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -19,8 +19,8 @@ namespace ErpBackend.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     InvoiceNumber = table.Column<string>(type: "TEXT", nullable: false),
                     CustomerName = table.Column<string>(type: "TEXT", nullable: false),
-                    InvoiceDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "TEXT", nullable: false),
+                    InvoiceDate = table.Column<DateTime>(nullable: false),
+                    TotalAmount = table.Column<decimal>(nullable: false),
                     Status = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -37,7 +37,7 @@ namespace ErpBackend.Migrations
                     InvoiceId = table.Column<int>(type: "INTEGER", nullable: false),
                     ProductId = table.Column<int>(type: "INTEGER", nullable: false),
                     Quantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "TEXT", nullable: false)
+                    UnitPrice = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
