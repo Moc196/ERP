@@ -1,4 +1,4 @@
-Ôªøusing Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -17,15 +17,15 @@ namespace ErpBackend.Migrations
                 keyColumn: "Id",
                 keyValue: 1,
                 columns: new[] { "BranchId", "Name" },
-                values: new object[] { 1, "K·∫ø to√°n kho H√† N·ªôi" });
+                values: new object[] { 1, "K? to·n kho H‡ N?i" });
 
             migrationBuilder.InsertData(
                 table: "Groups",
                 columns: new[] { "Id", "BranchId", "Name" },
                 values: new object[,]
                 {
-                    { 5, 2, "Sales S√†i G√≤n" },
-                    { 6, 2, "K·∫ø to√°n kho S√†i G√≤n" }
+                    { 5, 2, "Sales S‡i GÚn" },
+                    { 6, 2, "K? to·n kho S‡i GÚn" }
                 });
 
             migrationBuilder.UpdateData(
@@ -135,7 +135,7 @@ namespace ErpBackend.Migrations
                 keyColumn: "Id",
                 keyValue: 1,
                 columns: new[] { "BranchId", "Name" },
-                values: new object[] { null, "K·∫ø to√°n kho" });
+                values: new object[] { null, "K? to·n kho" });
 
             migrationBuilder.UpdateData(
                 table: "Users",

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -13,7 +13,7 @@ namespace ErpBackend.Migrations
             migrationBuilder.AddColumn<decimal>(
                 name: "PurchasePrice",
                 table: "Products",
-                type: "TEXT",
+
                 nullable: false,
                 defaultValue: 0m);
         }

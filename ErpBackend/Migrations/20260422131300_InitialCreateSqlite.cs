@@ -14,11 +14,11 @@ namespace ErpBackend.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(nullable: false),
                     Price = table.Column<decimal>(nullable: false),
-                    Stock = table.Column<int>(type: "INTEGER", nullable: false)
+                    Stock = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,11 +29,11 @@ namespace ErpBackend.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Username = table.Column<string>(type: "TEXT", nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: false),
-                    Role = table.Column<string>(type: "TEXT", nullable: false)
+                    Username = table.Column<string>(nullable: false),
+                    Password = table.Column<string>(nullable: false),
+                    Role = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {

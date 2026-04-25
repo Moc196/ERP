@@ -1,4 +1,4 @@
-ï»¿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -15,7 +15,7 @@ namespace ErpBackend.Migrations
             migrationBuilder.InsertData(
                 table: "Groups",
                 columns: new[] { "Id", "BranchId", "Name" },
-                values: new object[] { 3, 2, "Admin SÃ i GÃ²n" });
+                values: new object[] { 3, 2, "Admin Sài Gòn" });
 
             migrationBuilder.InsertData(
                 table: "Users",

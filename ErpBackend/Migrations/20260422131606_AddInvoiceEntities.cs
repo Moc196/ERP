@@ -15,13 +15,13 @@ namespace ErpBackend.Migrations
                 name: "Invoices",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    InvoiceNumber = table.Column<string>(type: "TEXT", nullable: false),
-                    CustomerName = table.Column<string>(type: "TEXT", nullable: false),
+                    InvoiceNumber = table.Column<string>(nullable: false),
+                    CustomerName = table.Column<string>(nullable: false),
                     InvoiceDate = table.Column<DateTime>(nullable: false),
                     TotalAmount = table.Column<decimal>(nullable: false),
-                    Status = table.Column<string>(type: "TEXT", nullable: false)
+                    Status = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,11 +32,11 @@ namespace ErpBackend.Migrations
                 name: "InvoiceItems",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    InvoiceId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ProductId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Quantity = table.Column<int>(type: "INTEGER", nullable: false),
+                    InvoiceId = table.Column<int>(nullable: false),
+                    ProductId = table.Column<int>(nullable: false),
+                    Quantity = table.Column<int>(nullable: false),
                     UnitPrice = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>

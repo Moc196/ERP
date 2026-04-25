@@ -15,13 +15,13 @@ namespace ErpBackend.Migrations
                 name: "AlertNotifications",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Type = table.Column<string>(type: "TEXT", nullable: false),
-                    Severity = table.Column<string>(type: "TEXT", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
-                    Message = table.Column<string>(type: "TEXT", nullable: false),
-                    IsRead = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Type = table.Column<string>(nullable: false),
+                    Severity = table.Column<string>(nullable: false),
+                    Title = table.Column<string>(nullable: false),
+                    Message = table.Column<string>(nullable: false),
+                    IsRead = table.Column<bool>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>

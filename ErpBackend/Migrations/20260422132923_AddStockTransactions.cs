@@ -14,7 +14,7 @@ namespace ErpBackend.Migrations
             migrationBuilder.AddColumn<int>(
                 name: "MinStockThreshold",
                 table: "Products",
-                type: "INTEGER",
+
                 nullable: false,
                 defaultValue: 0);
 
@@ -22,12 +22,12 @@ namespace ErpBackend.Migrations
                 name: "StockTransactions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ProductId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Quantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    Type = table.Column<string>(type: "TEXT", nullable: false),
-                    ReferenceId = table.Column<string>(type: "TEXT", nullable: false),
+                    ProductId = table.Column<int>(nullable: false),
+                    Quantity = table.Column<int>(nullable: false),
+                    Type = table.Column<string>(nullable: false),
+                    ReferenceId = table.Column<string>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>

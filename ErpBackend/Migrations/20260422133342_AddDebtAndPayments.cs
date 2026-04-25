@@ -14,7 +14,7 @@ namespace ErpBackend.Migrations
             migrationBuilder.AddColumn<DateTime>(
                 name: "DueDate",
                 table: "Invoices",
-                type: "TEXT",
+
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
@@ -28,12 +28,12 @@ namespace ErpBackend.Migrations
                 name: "Payments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    InvoiceId = table.Column<int>(type: "INTEGER", nullable: false),
+                    InvoiceId = table.Column<int>(nullable: false),
                     Amount = table.Column<decimal>(nullable: false),
                     PaymentDate = table.Column<DateTime>(nullable: false),
-                    PaymentMethod = table.Column<string>(type: "TEXT", nullable: false)
+                    PaymentMethod = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {

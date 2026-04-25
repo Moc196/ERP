@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -15,23 +15,23 @@ namespace ErpBackend.Migrations
             migrationBuilder.AddColumn<int>(
                 name: "BranchId",
                 table: "Users",
-                type: "INTEGER",
+
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "BranchId",
                 table: "Invoices",
-                type: "INTEGER",
+
                 nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "Groups",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    BranchId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Name = table.Column<string>(nullable: false),
+                    BranchId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -42,10 +42,10 @@ namespace ErpBackend.Migrations
                 name: "Permissions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -56,8 +56,8 @@ namespace ErpBackend.Migrations
                 name: "UserGroups",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    GroupId = table.Column<int>(type: "INTEGER", nullable: false)
+                    UserId = table.Column<int>(nullable: false),
+                    GroupId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -80,8 +80,8 @@ namespace ErpBackend.Migrations
                 name: "GroupPermissions",
                 columns: table => new
                 {
-                    GroupId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PermissionId = table.Column<int>(type: "INTEGER", nullable: false)
+                    GroupId = table.Column<int>(nullable: false),
+                    PermissionId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -105,8 +105,8 @@ namespace ErpBackend.Migrations
                 columns: new[] { "Id", "BranchId", "Name" },
                 values: new object[,]
                 {
-                    { 1, null, "Kế toán kho" },
-                    { 2, 1, "Sales Hà Nội" }
+                    { 1, null, "K? to�n kho" },
+                    { 2, 1, "Sales H� N?i" }
                 });
 
             migrationBuilder.InsertData(
@@ -114,13 +114,13 @@ namespace ErpBackend.Migrations
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
                 {
-                    { 1, "Xem sản phẩm", "product.view" },
-                    { 2, "Thêm sản phẩm", "product.create" },
-                    { 3, "Duyệt hóa đơn", "invoice.approve" },
-                    { 4, "Xuất báo cáo", "report.export" },
-                    { 5, "Nhập kho", "stock.import" },
-                    { 6, "Tạo hóa đơn", "invoice.create" },
-                    { 7, "Thanh toán", "invoice.payment" }
+                    { 1, "Xem s?n ph?m", "product.view" },
+                    { 2, "Th�m s?n ph?m", "product.create" },
+                    { 3, "Duy?t h�a don", "invoice.approve" },
+                    { 4, "Xu?t b�o c�o", "report.export" },
+                    { 5, "Nh?p kho", "stock.import" },
+                    { 6, "T?o h�a don", "invoice.create" },
+                    { 7, "Thanh to�n", "invoice.payment" }
                 });
 
             migrationBuilder.UpdateData(

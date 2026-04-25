@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -13,7 +13,7 @@ namespace ErpBackend.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "ProcessedBy",
                 table: "Payments",
-                type: "TEXT",
+
                 nullable: false,
                 defaultValue: "");
         }

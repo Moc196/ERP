@@ -20,7 +20,7 @@ namespace ErpBackend.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "CurrencyCode",
                 table: "Invoices",
-                type: "TEXT",
+
                 nullable: false,
                 defaultValue: "");
 
@@ -40,11 +40,11 @@ namespace ErpBackend.Migrations
                 name: "Branches",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Address = table.Column<string>(type: "TEXT", nullable: false),
-                    Phone = table.Column<string>(type: "TEXT", nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    Address = table.Column<string>(nullable: false),
+                    Phone = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -55,9 +55,9 @@ namespace ErpBackend.Migrations
                 name: "ExchangeRates",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CurrencyCode = table.Column<string>(type: "TEXT", nullable: false),
+                    CurrencyCode = table.Column<string>(nullable: false),
                     Rate = table.Column<decimal>(nullable: false),
                     Date = table.Column<DateTime>(nullable: false)
                 },
@@ -70,9 +70,9 @@ namespace ErpBackend.Migrations
                 name: "BranchStocks",
                 columns: table => new
                 {
-                    ProductId = table.Column<int>(type: "INTEGER", nullable: false),
-                    BranchId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Quantity = table.Column<int>(type: "INTEGER", nullable: false)
+                    ProductId = table.Column<int>(nullable: false),
+                    BranchId = table.Column<int>(nullable: false),
+                    Quantity = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -95,13 +95,13 @@ namespace ErpBackend.Migrations
                 name: "StockTransfers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ProductId = table.Column<int>(type: "INTEGER", nullable: false),
-                    FromBranchId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ToBranchId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Quantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProductId = table.Column<int>(nullable: false),
+                    FromBranchId = table.Column<int>(nullable: false),
+                    ToBranchId = table.Column<int>(nullable: false),
+                    Quantity = table.Column<int>(nullable: false),
+                    Status = table.Column<int>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
@@ -196,7 +196,7 @@ namespace ErpBackend.Migrations
             migrationBuilder.AddColumn<int>(
                 name: "Stock",
                 table: "Products",
-                type: "INTEGER",
+
                 nullable: false,
                 defaultValue: 0);
         }
