@@ -46,8 +46,39 @@ public class ProductsController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var createdProduct = await _productRepository.AddAsync(product);
-        return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
+        // Lưu sản phẩm trước
+        _context.Products.Add(product);
+        await _context.SaveChangesAsync();
+
+        // Khởi tạo tồn kho ban đầu tại chi nhánh của người dùng (hoặc CN 1 mặc định)
+        var branchId = _currentUserService.BranchId ?? 1;
+        var initialStock = product.Stock;
+
+        if (initialStock > 0)
+        {
+            _context.BranchStocks.Add(new BranchStock
+            {
+                ProductId = product.Id,
+                BranchId = branchId,
+                Quantity = initialStock
+            });
+
+            // Ghi nhận log nhập kho
+            _context.StockTransactions.Add(new StockTransaction
+            {
+                ProductId = product.Id,
+                Quantity = initialStock,
+                Type = "Initial",
+                ReferenceId = "INITIAL_STOCK",
+                CreatedBy = User.Identity?.Name ?? "admin",
+                CreatedAt = DateTime.UtcNow,
+                BranchId = branchId
+            });
+
+            await _context.SaveChangesAsync();
+        }
+
+        return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
     }
 
     [Authorize(Roles = "Admin")]

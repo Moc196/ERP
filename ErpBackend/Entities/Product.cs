@@ -13,7 +13,7 @@ public class Product
 
     [NotMapped]
     [JsonPropertyName("stock")]
-    public int Stock => BranchStocks?.Sum(s => s.Quantity) ?? 0;
+    public int Stock { get; set; }
     
     [JsonPropertyName("branchStocks")]
     public List<BranchStock> BranchStocks { get; set; } = new();
