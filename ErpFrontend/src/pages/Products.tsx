@@ -107,7 +107,7 @@ export const Products: React.FC = () => {
       });
       alert(res.data.message + (res.data.errors.length > 0 ? '\nLưu ý: Có một số lỗi ở các dòng: ' + res.data.errors.join(', ') : ''));
       setLastBatchId(res.data.batchId);
-      await fetchProducts();
+      await fetchInitialData();
     } catch (err: any) {
       alert('Lỗi Import: ' + (err.response?.data || 'Không thể đọc file!'));
     } finally {
@@ -125,7 +125,7 @@ export const Products: React.FC = () => {
       await api.post(`/products/import/undo/${lastBatchId}`);
       alert('Đã hoàn tác thành công!');
       setLastBatchId(null);
-      await fetchProducts();
+      await fetchInitialData();
     } catch (err: any) {
       alert('Lỗi hoàn tác: ' + (err.response?.data?.message || 'Có lỗi xảy ra!'));
     } finally {
@@ -141,7 +141,7 @@ export const Products: React.FC = () => {
       await api.post('/products', form);
       setShowModal(false);
       setForm(emptyProduct);
-      await fetchProducts();
+      await fetchInitialData();
     } catch (err: any) {
       setError(err.response?.data?.error || 'Có lỗi xảy ra!');
     } finally {
