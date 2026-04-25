@@ -54,6 +54,7 @@ try
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<AppDbContext>(options =>
     {
+        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         if (connectionString != null && (connectionString.Contains("Host=") || connectionString.Contains("Server=")))
         {
             options.UseNpgsql(connectionString);
