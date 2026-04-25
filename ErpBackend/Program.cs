@@ -43,9 +43,10 @@ try
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
-            policy.SetIsOriginAllowed(_ => true) // Cho phép tất cả origin ở Production (Render)
+            policy.WithOrigins("https://erp-frontend-vibe.onrender.com", "http://localhost:5173")
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()
+            .AllowCredentials());
     });
 
     builder.Services.AddSwaggerGen();
