@@ -22,6 +22,10 @@ Log.Logger = new LoggerConfiguration()
     )
     .CreateLogger();
 
+// Postgres Npgsql 6.0+ yêu cầu UTC cho timestamp. 
+// Bật switch này để giữ nguyên logic DateTime hiện tại của ứng dụng.
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 try
 {
     Log.Information("🚀 ERP.Vibe API đang khởi động...");
@@ -39,20 +43,28 @@ try
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
-            policy.WithOrigins(
-                "http://localhost:5173",  // Vite dev server
-                "http://localhost:3000"   // Docker production
-            )
+            policy.SetIsOriginAllowed(_ => true) // Cho phép tất cả origin ở Production (Render)
             .AllowAnyHeader()
             .AllowAnyMethod());
     });
 
     builder.Services.AddSwaggerGen();
 
-    // Configure Entity Framework (SQLite)
+    // Configure Entity Framework (SQLite/PostgreSQL)
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite(connectionString));
+    {
+        if (connectionString != null && (connectionString.Contains("Host=") || connectionString.Contains("Server=")))
+        {
+            options.UseNpgsql(connectionString);
+            Log.Information("🗄️ Sử dụng Database: PostgreSQL");
+        }
+        else
+        {
+            options.UseSqlite(connectionString);
+            Log.Information("🗄️ Sử dụng Database: SQLite");
+        }
+    });
     builder.Services.AddScoped<IProductRepository, ProductRepository>();
     builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 

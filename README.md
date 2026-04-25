@@ -36,7 +36,8 @@ coreNet/
 ```powershell
 # PowerShell (Windows)
 cd ErpBackend
-dotnet run
+
+
 ```
 
 > API chạy tại: **http://localhost:5013**  
@@ -74,7 +75,7 @@ docker-compose down
 |-----------|----------------------------|
 | Frontend  | http://localhost:3000      |
 | API       | http://localhost:5013      |
-| Swagger   | http://localhost:5013/swagger |
+| Swagger   | http://localhost:5013/swagger | 
 
 ---
 
