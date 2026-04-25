@@ -11,9 +11,14 @@ public class Product
     public decimal Price { get; set; } // Giá bán
     public int MinStockThreshold { get; set; } = 5;
 
+    private int? _initialStock;
     [NotMapped]
     [JsonPropertyName("stock")]
-    public int Stock { get; set; }
+    public int Stock 
+    { 
+        get => (BranchStocks != null && BranchStocks.Any()) ? BranchStocks.Sum(s => s.Quantity) : (_initialStock ?? 0);
+        set => _initialStock = value;
+    }
     
     [JsonPropertyName("branchStocks")]
     public List<BranchStock> BranchStocks { get; set; } = new();
