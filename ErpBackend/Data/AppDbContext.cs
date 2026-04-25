@@ -35,6 +35,9 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Kích hoạt tự động tăng ID chuẩn PostgreSQL
+        modelBuilder.UseIdentityByDefaultColumns();
+
         base.OnModelCreating(modelBuilder);
 
         // Many-to-many configuration
@@ -146,8 +149,8 @@ public class AppDbContext : DbContext
 
         // Seed Exchange Rates
         modelBuilder.Entity<ExchangeRate>().HasData(
-            new ExchangeRate { Id = 1, CurrencyCode = "USD", Rate = 25450.0m, Date = DateTime.Today },
-            new ExchangeRate { Id = 2, CurrencyCode = "EUR", Rate = 27120.0m, Date = DateTime.Today }
+            new ExchangeRate { Id = 1, CurrencyCode = "USD", Rate = 25450.0m, Date = DateTime.UtcNow.Date },
+            new ExchangeRate { Id = 2, CurrencyCode = "EUR", Rate = 27120.0m, Date = DateTime.UtcNow.Date }
         );
     }
 }
