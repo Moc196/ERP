@@ -300,7 +300,7 @@ export const Products: React.FC = () => {
                         <div className="text-[10px] text-slate-400 mt-1 flex flex-wrap justify-end gap-1.5">
                           {p.branchStocks.map(bs => (
                             <span key={bs.branchId} className="bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 whitespace-nowrap">
-                              {bs.branch?.name?.replace('Chi nhánh ', '') || `Kho ${bs.branchId}`}: {bs.quantity}
+                              {bs.branch?.name || `Kho ${bs.branchId}`}: {bs.quantity}
                             </span>
                           ))}
                         </div>
