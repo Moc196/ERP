@@ -66,6 +66,7 @@ public class AlertCheckerService
     {
         var threshold = DateTime.UtcNow.AddDays(-30);
         var overdueInvoices = await _context.Invoices
+            .Include(i => i.Branch)
             .Where(i => i.Status != "Paid" && i.DueDate < threshold)
             .ToListAsync();
 
@@ -85,6 +86,7 @@ public class AlertCheckerService
     {
         var soon = DateTime.UtcNow.AddDays(3);
         var dueSoon = await _context.Invoices
+            .Include(i => i.Branch)
             .Where(i => i.Status != "Paid" && i.DueDate <= soon && i.DueDate >= DateTime.UtcNow)
             .ToListAsync();
 
@@ -108,7 +110,8 @@ public class AlertCheckerService
         var abnormal = await _context.InvoiceItems
             .Include(i => i.Product)
             .Include(i => i.Invoice)
-            .Where(i => i.Quantity > threshold && i!.Invoice!.InvoiceDate >= yesterday && i!.Invoice!.Status != "Paid")
+                .ThenInclude(inv => inv.Branch)
+            .Where(i => i.Quantity > threshold && i.Invoice != null && i.Invoice.InvoiceDate >= yesterday && i.Invoice.Status != "Paid")
             .ToListAsync();
 
         foreach (var item in abnormal)
@@ -117,7 +120,7 @@ public class AlertCheckerService
             var isDup = await IsDuplicateAsync("AbnormalTx", key);
             if (isDup) continue;
 
-            var msg = $"🚨 GIAO DỊCH BẤT THƯỜNG \nChi nhánh: {item.Branch?.Name}\nHóa đơn: {item.Invoice?.InvoiceNumber}\nSản phẩm: {item.Product?.Name}\nSố lượng: {item.Quantity} (ngưỡng: {threshold})\nCần kiểm tra lại!";
+            var msg = $"🚨 GIAO DỊCH BẤT THƯỜNG \nChi nhánh: {item.Invoice?.Branch?.Name}\nHóa đơn: {item.Invoice?.InvoiceNumber}\nSản phẩm: {item.Product?.Name}\nSố lượng: {item.Quantity} (ngưỡng: {threshold})\nCần kiểm tra lại!";
             await CreateAndNotifyAsync("AbnormalTx", "Critical", $"Số lượng bất thường: {item.Product?.Name}", msg);
         }
     }

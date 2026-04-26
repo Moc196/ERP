@@ -20,6 +20,7 @@ public class Invoice
     public string Status { get; set; } = "Unpaid";
     public string CreatedBy { get; set; } = "system";
     public int? BranchId { get; set; } // For RLS
+    public virtual Branch? Branch { get; set; }
 
     public List<InvoiceItem> Items { get; set; } = new();
 }
