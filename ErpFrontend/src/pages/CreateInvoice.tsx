@@ -15,8 +15,12 @@ export const CreateInvoice: React.FC = () => {
   const [error, setError] = useState('');
   const [printInvoice, setPrintInvoice] = useState<any>(null);
   const [currency, setCurrency] = useState('VND');
+  const [customers, setCustomers] = useState<any[]>([]);
 
-  useEffect(() => { api.get('/products').then(r => setProducts(r.data)); }, []);
+  useEffect(() => { 
+    api.get('/products').then(r => setProducts(r.data)); 
+    api.get('/api/customers').then(r => setCustomers(r.data));
+  }, []);
 
   const fmt = (n: number) => new Intl.NumberFormat('vi-VN').format(n) + ' ₫';
   const total = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
@@ -67,9 +71,19 @@ export const CreateInvoice: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-bold text-slate-600 block mb-2">Tên khách hàng</label>
-            <input type="text" value={customerName} onChange={e => setCustomerName(e.target.value)}
-              placeholder="VD: Công ty TNHH Vibe..."
-              className="w-full border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+            <input 
+              list="customer-list"
+              type="text" 
+              value={customerName} 
+              onChange={e => setCustomerName(e.target.value)}
+              placeholder="Chọn hoặc nhập tên khách hàng..."
+              className="w-full border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            />
+            <datalist id="customer-list">
+              {customers.map(c => (
+                <option key={c.id} value={c.name}>{c.phone ? `SĐT: ${c.phone}` : ''}</option>
+              ))}
+            </datalist>
           </div>
           <div>
             <label className="text-sm font-bold text-slate-600 block mb-2">Tiền tệ</label>
