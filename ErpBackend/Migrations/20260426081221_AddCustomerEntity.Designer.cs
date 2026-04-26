@@ -29,29 +29,29 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Severity")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -62,19 +62,19 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -102,15 +102,15 @@ namespace ErpBackend.Migrations
             modelBuilder.Entity("ErpBackend.Entities.BranchStock", b =>
                 {
                     b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER")
+                        
                         .HasJsonPropertyName("productId");
 
                     b.Property<int>("BranchId")
-                        .HasColumnType("INTEGER")
+                        
                         .HasJsonPropertyName("branchId");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER")
+                        
                         .HasJsonPropertyName("quantity");
 
                     b.HasKey("ProductId", "BranchId");
@@ -126,29 +126,29 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("Address")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<int?>("BranchId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Email")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Phone")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("TaxId")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -161,17 +161,17 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<decimal>("Rate")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -198,14 +198,14 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int?>("BranchId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -253,10 +253,10 @@ namespace ErpBackend.Migrations
             modelBuilder.Entity("ErpBackend.Entities.GroupPermission", b =>
                 {
                     b.Property<int>("GroupId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("PermissionId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.HasKey("GroupId", "PermissionId");
 
@@ -401,48 +401,48 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int?>("BranchId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<DateTime>("InvoiceDate")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<decimal>("PaidAmount")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<decimal>("TotalAmountVND")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -455,19 +455,19 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("InvoiceId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -482,24 +482,24 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<int>("InvoiceId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("ProcessedBy")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -512,15 +512,15 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -575,20 +575,20 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("MinStockThreshold")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -599,31 +599,31 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int?>("BranchId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("ReferenceId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -638,25 +638,25 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<int>("FromBranchId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("ToBranchId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.HasKey("Id");
 
@@ -673,22 +673,22 @@ namespace ErpBackend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int?>("BranchId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        ;
 
                     b.HasKey("Id");
 
@@ -755,10 +755,10 @@ namespace ErpBackend.Migrations
             modelBuilder.Entity("ErpBackend.Entities.UserGroup", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.Property<int>("GroupId")
-                        .HasColumnType("INTEGER");
+                        ;
 
                     b.HasKey("UserId", "GroupId");
 
