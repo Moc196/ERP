@@ -11,6 +11,7 @@ interface BranchStock {
 
 interface Product {
   id: number;
+  productCode: string;
   name: string;
   purchasePrice: number;
   price: number;
@@ -19,7 +20,7 @@ interface Product {
   branchStocks: BranchStock[];
 }
 
-const emptyProduct = { name: '', purchasePrice: 0, price: 0, stock: 0, minStockThreshold: 5 };
+const emptyProduct = { productCode: '', name: '', purchasePrice: 0, price: 0, stock: 0, minStockThreshold: 5 };
 
 export const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -255,7 +256,7 @@ export const Products: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">ID</th>
+                <th className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Mã SP</th>
                 <th className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Tên sản phẩm</th>
                 <th className="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Giá nhập</th>
                 <th className="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Giá bán</th>
@@ -278,7 +279,11 @@ export const Products: React.FC = () => {
                 <tr><td colSpan={6} className="text-center py-12 text-slate-400">Chưa có sản phẩm. Hãy thêm mới!</td></tr>
               ) : products.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-400 font-mono">#{p.id}</td>
+                  <td className="px-6 py-4">
+                    <span className="font-mono text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">
+                      {p.productCode}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 font-semibold text-slate-800">{p.name}</td>
                   <td className="px-6 py-4 text-right text-sm text-slate-500">{formatMoney(p.purchasePrice)}</td>
                   <td className="px-6 py-4 text-right text-sm font-bold text-indigo-600">{formatMoney(p.price)}</td>
@@ -353,6 +358,7 @@ export const Products: React.FC = () => {
             {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm mb-4">{error}</div>}
             <form onSubmit={handleSubmit} className="space-y-4">
               {[
+                { label: 'Mã sản phẩm (SKU)', key: 'productCode', type: 'text', placeholder: 'Tự động sinh nếu để trống' },
                 { label: 'Tên sản phẩm', key: 'name', type: 'text', placeholder: 'VD: Bàn phím cơ Keychron' },
                 { label: 'Giá nhập (₫)', key: 'purchasePrice', type: 'number', placeholder: '300000' },
                 { label: 'Giá bán (₫)', key: 'price', type: 'number', placeholder: '500000' },

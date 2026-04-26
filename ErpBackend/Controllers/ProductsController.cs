@@ -41,13 +41,30 @@ public class ProductsController : ControllerBase
 
     [Authorize(Policy = "product.create")]
     [HttpPost]
-    public async Task<IActionResult> CreateProduct([FromBody] Product product)
+    public async Task<ActionResult<Product>> CreateProduct(Product product)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         try 
         {
+            // Kiểm tra trùng tên
+            if (await _context.Products.AnyAsync(p => p.Name == product.Name))
+            {
+                return BadRequest(new { error = "Tên sản phẩm này đã tồn tại!" });
+            }
+
+            // Tự động sinh mã nếu trống
+            if (string.IsNullOrEmpty(product.ProductCode))
+            {
+                var count = await _context.Products.CountAsync();
+                product.ProductCode = $"SP{DateTime.Now:yyyyMMdd}{count + 1:D3}";
+            }
+            else if (await _context.Products.AnyAsync(p => p.ProductCode == product.ProductCode))
+            {
+                return BadRequest(new { error = "Mã sản phẩm này đã tồn tại!" });
+            }
+
             // Lưu sản phẩm trước
             _context.Products.Add(product);
             await _context.SaveChangesAsync();

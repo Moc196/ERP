@@ -74,6 +74,14 @@ public class AppDbContext : DbContext
             .HasIndex(c => c.Phone)
             .IsUnique();
 
+        modelBuilder.Entity<Product>()
+            .HasIndex(p => p.ProductCode)
+            .IsUnique();
+
+        modelBuilder.Entity<Product>()
+            .HasIndex(p => p.Name)
+            .IsUnique();
+
         modelBuilder.Entity<StockTransaction>().HasQueryFilter(st => 
             _currentUserService.IsAdmin || 
             st.BranchId == _currentUserService.BranchId);
