@@ -35,7 +35,7 @@ export const Customers: React.FC = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get('/api/customers');
+      const response = await axios.get('/customers');
       setCustomers(response.data);
     } catch (error) {
       console.error('Lỗi khi tải danh sách khách hàng:', error);
@@ -50,9 +50,9 @@ export const Customers: React.FC = () => {
 
     try {
       if (currentCustomer.id) {
-        await axios.put(`/api/customers/${currentCustomer.id}`, currentCustomer);
+        await axios.put(`/customers/${currentCustomer.id}`, currentCustomer);
       } else {
-        await axios.post('/api/customers', currentCustomer);
+        await axios.post('/customers', currentCustomer);
       }
       setIsModalOpen(false);
       fetchCustomers();
@@ -65,7 +65,7 @@ export const Customers: React.FC = () => {
   const handleDelete = async (id: number) => {
     if (!confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) return;
     try {
-      await axios.delete(`/api/customers/${id}`);
+      await axios.delete(`/customers/${id}`);
       fetchCustomers();
     } catch (error) {
       console.error('Lỗi khi xóa khách hàng:', error);

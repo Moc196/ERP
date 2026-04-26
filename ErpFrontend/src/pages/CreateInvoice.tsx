@@ -19,7 +19,7 @@ export const CreateInvoice: React.FC = () => {
 
   useEffect(() => { 
     api.get('/products').then(r => setProducts(r.data)); 
-    api.get('/api/customers').then(r => setCustomers(r.data));
+    api.get('/customers').then(r => setCustomers(r.data));
   }, []);
 
   const fmt = (n: number) => new Intl.NumberFormat('vi-VN').format(n) + ' ₫';
