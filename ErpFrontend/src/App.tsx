@@ -8,6 +8,7 @@ import { Products } from './pages/Products';
 import { CreateInvoice } from './pages/CreateInvoice';
 import { Reports } from './pages/Reports';
 import { History } from './pages/History';
+import { Customers } from './pages/Customers';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -27,6 +28,7 @@ const App: React.FC = () => {
             <Route path="invoice/new" element={<CreateInvoice />} />
             <Route path="reports" element={<Reports />} />
             <Route path="history" element={<History />} />
+            <Route path="customers" element={<Customers />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

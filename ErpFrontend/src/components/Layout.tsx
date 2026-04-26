@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AlertBell } from './AlertBell';
-import { LayoutDashboard, Package, FileText, BarChart3, LogOut, Clock } from 'lucide-react';
+import { LayoutDashboard, Package, FileText, BarChart3, LogOut, Clock, Users } from 'lucide-react';
 
 export const Layout: React.FC = () => {
   const { role, branchName, logout } = useAuth();
@@ -19,6 +19,7 @@ export const Layout: React.FC = () => {
     { name: 'Create Invoice', path: '/invoice/new', icon: <FileText size={20} /> },
     { name: 'Reports', path: '/reports', icon: <BarChart3 size={20} /> },
     { name: 'Lịch Sử', path: '/history', icon: <Clock size={20} /> },
+    { name: 'Khách hàng', path: '/customers', icon: <Users size={20} /> },
   ];
 
   return (
