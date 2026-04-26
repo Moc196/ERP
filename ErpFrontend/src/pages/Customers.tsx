@@ -12,11 +12,13 @@ import {
   Phone,
   Mail,
   MapPin,
-  Building2
+  Building2,
+  Hash
 } from 'lucide-react';
 
 interface Customer {
   id?: number;
+  customerCode: string;
   name: string;
   phone: string;
   email: string;
@@ -59,9 +61,9 @@ export const Customers: React.FC = () => {
       }
       setIsModalOpen(false);
       fetchCustomers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Lỗi khi lưu khách hàng:', error);
-      alert('Không thể lưu khách hàng. Vui lòng kiểm tra lại!');
+      alert(error.response?.data?.error || 'Không thể lưu khách hàng. Vui lòng kiểm tra lại!');
     }
   };
 
@@ -99,10 +101,10 @@ export const Customers: React.FC = () => {
 
     try {
       setLoading(true);
-      await axios.post('/customers/import', formData, {
+      const res = await axios.post('/customers/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      alert('Nhập dữ liệu thành công!');
+      alert(`Nhập dữ liệu thành công! Thêm mới: ${res.data.count}, Bỏ qua trùng: ${res.data.skipped}`);
       fetchCustomers();
     } catch (error) {
       console.error('Lỗi khi nhập Excel:', error);
@@ -115,7 +117,8 @@ export const Customers: React.FC = () => {
 
   const filteredCustomers = customers.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.phone.includes(searchTerm)
+    c.phone?.includes(searchTerm) ||
+    c.customerCode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -153,7 +156,7 @@ export const Customers: React.FC = () => {
           </button>
           <button
             onClick={() => {
-              setCurrentCustomer({ name: '', phone: '', email: '', address: '', taxId: '' });
+              setCurrentCustomer({ customerCode: '', name: '', phone: '', email: '', address: '', taxId: '' });
               setIsModalOpen(true);
             }}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200 font-semibold"
@@ -170,7 +173,7 @@ export const Customers: React.FC = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Tìm kiếm khách hàng theo tên, số điện thoại..."
+            placeholder="Tìm kiếm theo mã, tên hoặc số điện thoại..."
             className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -180,20 +183,20 @@ export const Customers: React.FC = () => {
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Mã KH</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tên khách hàng</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Liên hệ</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Địa chỉ</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Mã số thuế</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400">Đang tải dữ liệu...</td>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium">Đang xử lý dữ liệu...</td>
                 </tr>
               ) : filteredCustomers.length === 0 ? (
                 <tr>
@@ -203,8 +206,13 @@ export const Customers: React.FC = () => {
                 filteredCustomers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4">
+                      <span className="font-mono text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">
+                        {customer.customerCode}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold">
+                        <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shadow-sm border border-indigo-100">
                           {customer.name.charAt(0)}
                         </div>
                         <span className="font-bold text-slate-800">{customer.name}</span>
@@ -212,26 +220,21 @@ export const Customers: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                          <Phone className="w-3.5 h-3.5" />
+                        <div className="flex items-center gap-2 text-sm text-slate-700 font-medium">
+                          <Phone className="w-3.5 h-3.5 text-indigo-500" />
                           {customer.phone || '---'}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-slate-400">
+                        <div className="flex items-center gap-2 text-xs text-slate-400">
                           <Mail className="w-3.5 h-3.5" />
                           {customer.email || '---'}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-start gap-2 text-sm text-slate-600 max-w-xs">
-                        <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                      <div className="flex items-start gap-2 text-sm text-slate-600 max-w-[200px]">
+                        <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0 text-slate-400" />
                         <span className="truncate">{customer.address || '---'}</span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-mono font-bold">
-                        {customer.taxId || '---'}
-                      </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
@@ -241,12 +244,14 @@ export const Customers: React.FC = () => {
                             setIsModalOpen(true);
                           }}
                           className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          title="Chỉnh sửa"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => customer.id && handleDelete(customer.id)}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                          title="Xóa"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -262,8 +267,8 @@ export const Customers: React.FC = () => {
 
       {/* Modal Thêm/Sửa */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h2 className="text-xl font-bold text-slate-800">
                 {currentCustomer?.id ? 'Cập nhật thông tin' : 'Thêm khách hàng mới'}
@@ -277,6 +282,30 @@ export const Customers: React.FC = () => {
             </div>
 
             <form onSubmit={handleSave} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
+                    <Hash className="w-4 h-4 text-slate-400" /> Mã khách hàng
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Tự động sinh nếu để trống"
+                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
+                    value={currentCustomer?.customerCode}
+                    onChange={(e) => setCurrentCustomer(prev => ({ ...prev!, customerCode: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Mã số thuế</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm"
+                    value={currentCustomer?.taxId}
+                    onChange={(e) => setCurrentCustomer(prev => ({ ...prev!, taxId: e.target.value }))}
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Tên khách hàng *</label>
                 <input
@@ -288,29 +317,24 @@ export const Customers: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Số điện thoại</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    value={currentCustomer?.phone}
-                    onChange={(e) => setCurrentCustomer(prev => ({ ...prev!, phone: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Mã số thuế</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    value={currentCustomer?.taxId}
-                    onChange={(e) => setCurrentCustomer(prev => ({ ...prev!, taxId: e.target.value }))}
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-slate-400" /> Số điện thoại *
+                </label>
+                <input
+                  required
+                  type="text"
+                  placeholder="Bắt buộc và không được trùng"
+                  className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500"
+                  value={currentCustomer?.phone}
+                  onChange={(e) => setCurrentCustomer(prev => ({ ...prev!, phone: e.target.value }))}
+                />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-slate-400" /> Email
+                </label>
                 <input
                   type="email"
                   className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500"
@@ -320,10 +344,12 @@ export const Customers: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Địa chỉ</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-slate-400" /> Địa chỉ
+                </label>
                 <textarea
-                  rows={3}
-                  className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500"
+                  rows={2}
+                  className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm"
                   value={currentCustomer?.address}
                   onChange={(e) => setCurrentCustomer(prev => ({ ...prev!, address: e.target.value }))}
                 />
@@ -342,7 +368,7 @@ export const Customers: React.FC = () => {
                   className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-indigo-200"
                 >
                   <Save className="w-5 h-5" />
-                  Lưu thông tin
+                  Lưu khách hàng
                 </button>
               </div>
             </form>

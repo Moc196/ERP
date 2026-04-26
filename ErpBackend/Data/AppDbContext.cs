@@ -66,6 +66,14 @@ public class AppDbContext : DbContext
             _currentUserService.IsAdmin || 
             c.BranchId == _currentUserService.BranchId);
 
+        modelBuilder.Entity<Customer>()
+            .HasIndex(c => c.CustomerCode)
+            .IsUnique();
+
+        modelBuilder.Entity<Customer>()
+            .HasIndex(c => c.Phone)
+            .IsUnique();
+
         modelBuilder.Entity<StockTransaction>().HasQueryFilter(st => 
             _currentUserService.IsAdmin || 
             st.BranchId == _currentUserService.BranchId);

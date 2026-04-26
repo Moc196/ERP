@@ -39,6 +39,23 @@ namespace ErpBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<Customer>> CreateCustomer(Customer customer)
         {
+            // Kiểm tra trùng SĐT
+            if (!string.IsNullOrEmpty(customer.Phone) && await _context.Customers.AnyAsync(c => c.Phone == customer.Phone))
+            {
+                return BadRequest(new { error = "Số điện thoại này đã tồn tại trong hệ thống!" });
+            }
+
+            // Tự động sinh mã nếu trống
+            if (string.IsNullOrEmpty(customer.CustomerCode))
+            {
+                var count = await _context.Customers.CountAsync();
+                customer.CustomerCode = $"KH{DateTime.Now:yyyyMMdd}{count + 1:D3}";
+            }
+            else if (await _context.Customers.AnyAsync(c => c.CustomerCode == customer.CustomerCode))
+            {
+                return BadRequest(new { error = "Mã khách hàng này đã tồn tại!" });
+            }
+
             customer.BranchId = _currentUser.BranchId;
             customer.CreatedAt = DateTime.UtcNow;
 
@@ -127,12 +144,30 @@ namespace ErpBackend.Controllers
             var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Bỏ qua header
 
             var newCustomers = new List<Customer>();
+            var skipCount = 0;
+            var rowIdx = 1;
+
             foreach (var row in rows)
             {
+                rowIdx++;
+                var name = row.Cell(1).GetValue<string>();
+                var phone = row.Cell(2).GetValue<string>();
+                
+                if (string.IsNullOrEmpty(name)) continue;
+
+                // Kiểm tra trùng trong DB hoặc trong list sắp add
+                if ((!string.IsNullOrEmpty(phone) && await _context.Customers.AnyAsync(c => c.Phone == phone)) ||
+                    newCustomers.Any(nc => nc.Phone == phone))
+                {
+                    skipCount++;
+                    continue;
+                }
+
                 newCustomers.Add(new Customer
                 {
-                    Name = row.Cell(1).GetValue<string>(),
-                    Phone = row.Cell(2).GetValue<string>(),
+                    CustomerCode = $"KH-IMP-{DateTime.Now:HHmmss}-{rowIdx}",
+                    Name = name,
+                    Phone = phone,
                     Email = row.Cell(3).GetValue<string>(),
                     Address = row.Cell(4).GetValue<string>(),
                     TaxId = row.Cell(5).GetValue<string>(),
@@ -141,10 +176,13 @@ namespace ErpBackend.Controllers
                 });
             }
 
-            _context.Customers.AddRange(newCustomers);
-            await _context.SaveChangesAsync();
+            if (newCustomers.Any())
+            {
+                _context.Customers.AddRange(newCustomers);
+                await _context.SaveChangesAsync();
+            }
 
-            return Ok(new { count = newCustomers.Count });
+            return Ok(new { count = newCustomers.Count, skipped = skipCount });
         }
 
         private bool CustomerExists(int id)
