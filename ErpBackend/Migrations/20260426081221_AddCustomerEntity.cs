@@ -16,15 +16,15 @@ namespace ErpBackend.Migrations
                 name: "Customers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Phone = table.Column<string>(type: "TEXT", nullable: true),
-                    Email = table.Column<string>(type: "TEXT", nullable: true),
-                    Address = table.Column<string>(type: "TEXT", nullable: true),
-                    TaxId = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    BranchId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Name = table.Column<string>(nullable: false),
+                    Phone = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: true),
+                    Address = table.Column<string>(nullable: true),
+                    TaxId = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    BranchId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
