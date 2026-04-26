@@ -297,10 +297,10 @@ export const Products: React.FC = () => {
                         {p.stock}
                       </span>
                       {role === 'Admin' && p.branchStocks?.length > 0 && (
-                        <div className="text-[10px] text-slate-400 mt-1 flex flex-wrap justify-end gap-1.5">
+                        <div className="text-[10px] text-slate-400 mt-2 flex flex-wrap justify-end gap-1">
                           {p.branchStocks.map(bs => (
-                            <span key={bs.branchId} className="bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 whitespace-nowrap">
-                              {bs.branch?.name || `Kho ${bs.branchId}`}: {bs.quantity}
+                            <span key={bs.branchId} className="bg-slate-100/50 text-slate-500 px-2 py-0.5 rounded-md border border-slate-200/50 whitespace-nowrap font-medium">
+                              {bs.branch?.name?.replace('Chi nhánh ', '') || `Kho ${bs.branchId}`}: <span className="text-indigo-600 font-bold">{bs.quantity}</span>
                             </span>
                           ))}
                         </div>

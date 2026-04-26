@@ -164,8 +164,8 @@ public class AppDbContext : DbContext
 
         // Seed Branches
         modelBuilder.Entity<Branch>().HasData(
-            new Branch { Id = 1, Name = "Chi nhánh Hà Nội", Address = "123 Cầu Giấy, Hà Nội", Phone = "024.111.222" },
-            new Branch { Id = 2, Name = "Chi nhánh Sài Gòn", Address = "456 Quận 1, TP.HCM", Phone = "028.333.444" }
+            new Branch { Id = 1, Name = "Hà Nội", Address = "123 Cầu Giấy, Hà Nội", Phone = "024.111.222" },
+            new Branch { Id = 2, Name = "Sài Gòn", Address = "456 Quận 1, TP.HCM", Phone = "028.333.444" }
         );
 
         // Seed Exchange Rates
