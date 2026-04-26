@@ -75,7 +75,7 @@ public class AlertCheckerService
             if (isDup) continue;
 
             var days = (int)(DateTime.UtcNow - inv.DueDate).TotalDays;
-            var msg = $"🚨 CÔNG NỢ QUÁ HẠN\nHóa đơn: {inv.InvoiceNumber}\nKhách hàng: {inv.CustomerName}\nSố tiền: {inv.TotalAmount - inv.PaidAmount:N0}₫\nQuá hạn: {days} ngày";
+            var msg = $"🚨 CÔNG NỢ QUÁ HẠN \nChi nhánh: {inv.Branch?.Name}  \nHóa đơn: {inv.InvoiceNumber}\nKhách hàng: {inv.CustomerName}\nSố tiền: {inv.TotalAmount - inv.PaidAmount:N0}₫\nQuá hạn: {days} ngày";
             await CreateAndNotifyAsync("OverdueDebt", "Critical", $"Công nợ quá hạn: {inv.CustomerName}", msg);
         }
     }
@@ -94,7 +94,7 @@ public class AlertCheckerService
             if (isDup) continue;
 
             var days = (int)(inv.DueDate - DateTime.UtcNow).TotalDays;
-            var msg = $"⏰ SẮP ĐẾN HẠN THANH TOÁN\nHóa đơn: {inv.InvoiceNumber}\nKhách hàng: {inv.CustomerName}\nSố tiền: {inv.TotalAmount - inv.PaidAmount:N0}₫\nCòn: {days} ngày";
+            var msg = $"⏰ SẮP ĐẾN HẠN THANH TOÁN\nChi nhánh: {inv.Branch?.Name}\nHóa đơn: {inv.InvoiceNumber}\nKhách hàng: {inv.CustomerName}\nSố tiền: {inv.TotalAmount - inv.PaidAmount:N0}₫\nCòn: {days} ngày";
             await CreateAndNotifyAsync("DueSoon", "Warning", $"Sắp đến hạn: {inv.InvoiceNumber}", msg);
         }
     }
@@ -117,7 +117,7 @@ public class AlertCheckerService
             var isDup = await IsDuplicateAsync("AbnormalTx", key);
             if (isDup) continue;
 
-            var msg = $"🚨 GIAO DỊCH BẤT THƯỜNG\nHóa đơn: {item.Invoice?.InvoiceNumber}\nSản phẩm: {item.Product?.Name}\nSố lượng: {item.Quantity} (ngưỡng: {threshold})\nCần kiểm tra lại!";
+            var msg = $"🚨 GIAO DỊCH BẤT THƯỜNG \nChi nhánh: {item.Branch?.Name}\nHóa đơn: {item.Invoice?.InvoiceNumber}\nSản phẩm: {item.Product?.Name}\nSố lượng: {item.Quantity} (ngưỡng: {threshold})\nCần kiểm tra lại!";
             await CreateAndNotifyAsync("AbnormalTx", "Critical", $"Số lượng bất thường: {item.Product?.Name}", msg);
         }
     }
