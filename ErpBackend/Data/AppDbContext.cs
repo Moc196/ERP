@@ -32,6 +32,7 @@ public class AppDbContext : DbContext
     public DbSet<BranchStock> BranchStocks { get; set; }
     public DbSet<StockTransfer> StockTransfers { get; set; }
     public DbSet<ExchangeRate> ExchangeRates { get; set; }
+    public DbSet<Customer> Customers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -60,6 +61,10 @@ public class AppDbContext : DbContext
             _currentUserService.IsAdmin || 
             st.FromBranchId == _currentUserService.BranchId || 
             st.ToBranchId == _currentUserService.BranchId);
+
+        modelBuilder.Entity<Customer>().HasQueryFilter(c => 
+            _currentUserService.IsAdmin || 
+            c.BranchId == _currentUserService.BranchId);
 
         modelBuilder.Entity<StockTransaction>().HasQueryFilter(st => 
             _currentUserService.IsAdmin || 
