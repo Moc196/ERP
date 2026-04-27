@@ -7,7 +7,6 @@ namespace ErpBackend.Entities;
 public class Product
 {
     public int Id { get; set; }
-    [Required]
     public string ProductCode { get; set; } = string.Empty; // Mã SKU (SP001...)
     public string Name { get; set; } = string.Empty;
     public decimal PurchasePrice { get; set; } // Giá nhập

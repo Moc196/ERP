@@ -373,7 +373,7 @@ export const Products: React.FC = () => {
                     onChange={(e) => setForm(f => ({ ...f, [key]: type === 'number' ? Number(e.target.value) : e.target.value }))}
                     placeholder={placeholder}
                     className="w-full border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition"
-                    required
+                    required={key !== 'productCode'}
                   />
                 </div>
               ))}

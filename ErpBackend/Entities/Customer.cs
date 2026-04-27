@@ -6,7 +6,6 @@ namespace ErpBackend.Entities
     {
         public int Id { get; set; }
         
-        [Required]
         public string CustomerCode { get; set; } = string.Empty; // Mã khách hàng (KH001...)
         
         [Required]
