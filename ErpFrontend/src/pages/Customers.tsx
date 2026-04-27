@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import { 
   UserPlus, 
   Search, 
@@ -13,21 +14,31 @@ import {
   Mail,
   MapPin,
   Building2,
-  Hash
+  Hash,
+  Globe
 } from 'lucide-react';
 
 interface Customer {
   id?: number;
-  customerCode: string;
+  customerCode?: string;
   name: string;
   phone: string;
   email: string;
   address: string;
   taxId: string;
+  customerBranches?: { branchId: number; branch?: { name: string } }[];
+  branchIds?: number[];
+}
+
+interface Branch {
+  id: number;
+  name: string;
 }
 
 export const Customers: React.FC = () => {
+  const { role } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,7 +47,8 @@ export const Customers: React.FC = () => {
 
   useEffect(() => {
     fetchCustomers();
-  }, []);
+    if (role === 'Admin') fetchBranches();
+  }, [role]);
 
   const fetchCustomers = async () => {
     try {
@@ -46,6 +58,15 @@ export const Customers: React.FC = () => {
       console.error('Lỗi khi tải danh sách khách hàng:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBranches = async () => {
+    try {
+      const response = await axios.get('/branches');
+      setBranches(response.data);
+    } catch (error) {
+      console.error('Lỗi khi tải danh sách chi nhánh:', error);
     }
   };
 
@@ -115,6 +136,15 @@ export const Customers: React.FC = () => {
     }
   };
 
+  const toggleBranch = (branchId: number) => {
+    if (!currentCustomer) return;
+    const currentIds = currentCustomer.branchIds || [];
+    const newIds = currentIds.includes(branchId)
+      ? currentIds.filter(id => id !== branchId)
+      : [...currentIds, branchId];
+    setCurrentCustomer({ ...currentCustomer, branchIds: newIds });
+  };
+
   const filteredCustomers = customers.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.phone?.includes(searchTerm) ||
@@ -127,9 +157,9 @@ export const Customers: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
             <Building2 className="w-8 h-8 text-indigo-600" />
-            Quản lý Đối tác
+            Partners Management
           </h1>
-          <p className="text-slate-500 mt-1">Quản lý danh sách khách hàng và nhà cung cấp chuyên nghiệp</p>
+          <p className="text-slate-500 mt-1">Manage customers and suppliers across branches</p>
         </div>
 
         <div className="flex gap-3">
@@ -145,35 +175,35 @@ export const Customers: React.FC = () => {
             className="flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 px-4 py-2.5 rounded-xl transition-all font-semibold"
           >
             <Upload className="w-4 h-4" />
-            Nhập Excel
+            Import
           </button>
           <button
             onClick={handleExport}
             className="flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 px-4 py-2.5 rounded-xl transition-all font-semibold"
           >
             <FileDown className="w-4 h-4" />
-            Xuất Excel
+            Export
           </button>
           <button
             onClick={() => {
-              setCurrentCustomer({ customerCode: '', name: '', phone: '', email: '', address: '', taxId: '' });
+              setCurrentCustomer({ customerCode: '', name: '', phone: '', email: '', address: '', taxId: '', branchIds: [] });
               setIsModalOpen(true);
             }}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200 font-semibold"
           >
             <UserPlus className="w-5 h-5" />
-            Thêm mới
+            Add Customer
           </button>
         </div>
       </div>
 
-      {/* Thanh tìm kiếm */}
+      {/* Search Bar */}
       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Tìm kiếm theo mã, tên hoặc số điện thoại..."
+            placeholder="Search by code, name or phone..."
             className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -186,21 +216,22 @@ export const Customers: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Mã KH</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tên khách hàng</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Liên hệ</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Địa chỉ</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Thao tác</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Code</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Contact</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Address</th>
+                {role === 'Admin' && <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Branches</th>}
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium">Đang xử lý dữ liệu...</td>
+                  <td colSpan={role === 'Admin' ? 6 : 5} className="px-6 py-12 text-center text-slate-400 font-medium">Loading data...</td>
                 </tr>
               ) : filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400">Không tìm thấy khách hàng nào</td>
+                  <td colSpan={role === 'Admin' ? 6 : 5} className="px-6 py-12 text-center text-slate-400">No customers found</td>
                 </tr>
               ) : (
                 filteredCustomers.map((customer) => (
@@ -236,22 +267,36 @@ export const Customers: React.FC = () => {
                         <span className="truncate">{customer.address || '---'}</span>
                       </div>
                     </td>
+                    {role === 'Admin' && (
+                      <td className="px-6 py-4">
+                        <div className="flex flex-wrap gap-1">
+                          {customer.customerBranches?.map(cb => (
+                            <span key={cb.branchId} className="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-100">
+                              {cb.branch?.name}
+                            </span>
+                          )) || <span className="text-xs text-slate-300">None</span>}
+                        </div>
+                      </td>
+                    )}
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button 
                           onClick={() => {
-                            setCurrentCustomer(customer);
+                            setCurrentCustomer({
+                              ...customer,
+                              branchIds: customer.customerBranches?.map(cb => cb.branchId) || []
+                            });
                             setIsModalOpen(true);
                           }}
                           className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                          title="Chỉnh sửa"
+                          title="Edit"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => customer.id && handleDelete(customer.id)}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                          title="Xóa"
+                          title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -265,13 +310,13 @@ export const Customers: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal Thêm/Sửa */}
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h2 className="text-xl font-bold text-slate-800">
-                {currentCustomer?.id ? 'Cập nhật thông tin' : 'Thêm khách hàng mới'}
+                {currentCustomer?.id ? 'Edit Customer' : 'Add New Customer'}
               </h2>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -281,22 +326,22 @@ export const Customers: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-6 space-y-4">
+            <form onSubmit={handleSave} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
-                    <Hash className="w-4 h-4 text-slate-400" /> Mã khách hàng
+                    <Hash className="w-4 h-4 text-slate-400" /> Code
                   </label>
                   <input
                     type="text"
-                    placeholder="Tự động sinh nếu để trống"
+                    placeholder="Auto-generated"
                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
                     value={currentCustomer?.customerCode}
                     onChange={(e) => setCurrentCustomer(prev => ({ ...prev!, customerCode: e.target.value }))}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Mã số thuế</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Tax ID</label>
                   <input
                     type="text"
                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm"
@@ -307,7 +352,7 @@ export const Customers: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Tên khách hàng *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Name *</label>
                 <input
                   required
                   type="text"
@@ -319,12 +364,11 @@ export const Customers: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-slate-400" /> Số điện thoại *
+                  <Phone className="w-4 h-4 text-slate-400" /> Phone *
                 </label>
                 <input
                   required
                   type="text"
-                  placeholder="Bắt buộc và không được trùng"
                   className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500"
                   value={currentCustomer?.phone}
                   onChange={(e) => setCurrentCustomer(prev => ({ ...prev!, phone: e.target.value }))}
@@ -345,7 +389,7 @@ export const Customers: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-slate-400" /> Địa chỉ
+                  <MapPin className="w-4 h-4 text-slate-400" /> Address
                 </label>
                 <textarea
                   rows={2}
@@ -355,20 +399,41 @@ export const Customers: React.FC = () => {
                 />
               </div>
 
+              {role === 'Admin' && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-indigo-500" /> Branch Assignments
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50 p-4 rounded-2xl">
+                    {branches.map(branch => (
+                      <label key={branch.id} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-100 cursor-pointer hover:border-indigo-200 transition-colors">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                          checked={currentCustomer?.branchIds?.includes(branch.id)}
+                          onChange={() => toggleBranch(branch.id)}
+                        />
+                        <span className="text-sm font-medium text-slate-700">{branch.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-all"
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-indigo-200"
                 >
                   <Save className="w-5 h-5" />
-                  Lưu khách hàng
+                  Save Changes
                 </button>
               </div>
             </form>
@@ -378,3 +443,4 @@ export const Customers: React.FC = () => {
     </div>
   );
 };
+

@@ -33,6 +33,7 @@ public class AppDbContext : DbContext
     public DbSet<StockTransfer> StockTransfers { get; set; }
     public DbSet<ExchangeRate> ExchangeRates { get; set; }
     public DbSet<Customer> Customers { get; set; }
+    public DbSet<CustomerBranch> CustomerBranches { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,6 +45,7 @@ public class AppDbContext : DbContext
         // Many-to-many configuration
         modelBuilder.Entity<UserGroup>().HasKey(ug => new { ug.UserId, ug.GroupId });
         modelBuilder.Entity<GroupPermission>().HasKey(gp => new { gp.GroupId, gp.PermissionId });
+        modelBuilder.Entity<CustomerBranch>().HasKey(cb => new { cb.CustomerId, cb.BranchId });
 
         // Row-Level Security (RLS) simulation via Global Query Filters
         // If Admin, see everything. If User, see only their branch.
@@ -64,7 +66,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Customer>().HasQueryFilter(c => 
             _currentUserService.IsAdmin || 
-            c.BranchId == _currentUserService.BranchId);
+            c.CustomerBranches.Any(cb => cb.BranchId == _currentUserService.BranchId));
 
         modelBuilder.Entity<Customer>()
             .HasIndex(c => c.CustomerCode)

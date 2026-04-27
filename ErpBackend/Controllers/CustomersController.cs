@@ -25,7 +25,12 @@ namespace ErpBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
         {
-            return await _context.Customers.OrderByDescending(c => c.CreatedAt).ToListAsync();
+            var query = _context.Customers
+                .Include(c => c.CustomerBranches)
+                    .ThenInclude(cb => cb.Branch)
+                .OrderByDescending(c => c.CreatedAt);
+
+            return await query.ToListAsync();
         }
 
         [HttpGet("{id}")]
@@ -56,10 +61,25 @@ namespace ErpBackend.Controllers
                 return BadRequest(new { error = "Mã khách hàng này đã tồn tại!" });
             }
 
-            customer.BranchId = _currentUser.BranchId;
             customer.CreatedAt = DateTime.UtcNow;
-
             _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+
+            // Xử lý chi nhánh
+            var branchIdsToAssign = new List<int>();
+            if (customer.BranchIds != null && customer.BranchIds.Any())
+            {
+                branchIdsToAssign = customer.BranchIds;
+            }
+            else if (_currentUser.BranchId.HasValue)
+            {
+                branchIdsToAssign.Add(_currentUser.BranchId.Value);
+            }
+
+            foreach (var bId in branchIdsToAssign)
+            {
+                _context.CustomerBranches.Add(new CustomerBranch { CustomerId = customer.Id, BranchId = bId });
+            }
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
@@ -71,11 +91,25 @@ namespace ErpBackend.Controllers
             if (id != customer.Id) return BadRequest();
 
             _context.Entry(customer).State = EntityState.Modified;
-            customer.BranchId = _currentUser.BranchId; // Ensure branch doesn't change
 
             try
             {
                 await _context.SaveChangesAsync();
+
+                // Cập nhật chi nhánh nếu có gửi lên (thường là Admin)
+                if (customer.BranchIds != null)
+                {
+                    var existingBranches = await _context.CustomerBranches
+                        .Where(cb => cb.CustomerId == id)
+                        .ToListAsync();
+                    _context.CustomerBranches.RemoveRange(existingBranches);
+
+                    foreach (var bId in customer.BranchIds)
+                    {
+                        _context.CustomerBranches.Add(new CustomerBranch { CustomerId = id, BranchId = bId });
+                    }
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -171,7 +205,6 @@ namespace ErpBackend.Controllers
                     Email = row.Cell(3).GetValue<string>(),
                     Address = row.Cell(4).GetValue<string>(),
                     TaxId = row.Cell(5).GetValue<string>(),
-                    BranchId = _currentUser.BranchId,
                     CreatedAt = DateTime.UtcNow
                 });
             }
@@ -180,6 +213,16 @@ namespace ErpBackend.Controllers
             {
                 _context.Customers.AddRange(newCustomers);
                 await _context.SaveChangesAsync();
+
+                // Liên kết với chi nhánh người import
+                if (_currentUser.BranchId.HasValue)
+                {
+                    foreach (var nc in newCustomers)
+                    {
+                        _context.CustomerBranches.Add(new CustomerBranch { CustomerId = nc.Id, BranchId = _currentUser.BranchId.Value });
+                    }
+                    await _context.SaveChangesAsync();
+                }
             }
 
             return Ok(new { count = newCustomers.Count, skipped = skipCount });

@@ -18,7 +18,9 @@ namespace ErpBackend.Entities
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
-        public int? BranchId { get; set; } // Để phân vùng khách hàng theo chi nhánh
-        public virtual Branch? Branch { get; set; }
+        public virtual ICollection<CustomerBranch> CustomerBranches { get; set; } = new List<CustomerBranch>();
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public List<int>? BranchIds { get; set; }
     }
 }
