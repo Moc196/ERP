@@ -48,11 +48,14 @@ namespace ErpBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<Customer>> CreateCustomer(Customer customer)
         {
+            // Chuẩn hóa SĐT
+            var phone = customer.Phone?.Trim();
+
             // Kiểm tra xem khách hàng đã tồn tại trong hệ thống chưa (bất kể chi nhánh nào) theo Số điện thoại
             var existingCustomer = await _context.Customers
                 .IgnoreQueryFilters()
                 .Include(c => c.CustomerBranches)
-                .FirstOrDefaultAsync(c => !string.IsNullOrEmpty(customer.Phone) && c.Phone == customer.Phone);
+                .FirstOrDefaultAsync(c => !string.IsNullOrEmpty(phone) && c.Phone == phone);
 
             if (existingCustomer != null)
             {
@@ -64,17 +67,30 @@ namespace ErpBackend.Controllers
                     var alreadyLinked = existingCustomer.CustomerBranches.Any(cb => cb.BranchId == targetBranchId.Value);
                     if (!alreadyLinked)
                     {
+                        // Cập nhật thông tin nếu có thông tin mới hơn (tùy chọn)
+                        if (!string.IsNullOrEmpty(customer.Name)) existingCustomer.Name = customer.Name;
+                        if (!string.IsNullOrEmpty(customer.Address)) existingCustomer.Address = customer.Address;
+                        if (!string.IsNullOrEmpty(customer.Email)) existingCustomer.Email = customer.Email;
+
                         _context.CustomerBranches.Add(new CustomerBranch 
                         { 
                             CustomerId = existingCustomer.Id, 
                             BranchId = targetBranchId.Value 
                         });
                         await _context.SaveChangesAsync();
-                        return Ok(existingCustomer); // Trả về khách hàng hiện tại
+                        
+                        // Lấy lại dữ liệu đầy đủ để trả về
+                        var updated = await _context.Customers
+                            .Include(c => c.CustomerBranches)
+                                .ThenInclude(cb => cb.Branch)
+                            .FirstOrDefaultAsync(c => c.Id == existingCustomer.Id);
+
+                        return Ok(updated);
                     }
                     else
                     {
-                        return BadRequest(new { error = "Khách hàng này đã tồn tại ở chi nhánh này rồi!" });
+                        // Nếu đã có rồi thì trả về luôn thay vì báo lỗi (để frontend đỡ báo đỏ)
+                        return Ok(existingCustomer);
                     }
                 }
             }
@@ -209,6 +225,7 @@ namespace ErpBackend.Controllers
             var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Bỏ qua header
 
             var newCustomers = new List<Customer>();
+            var existingCustomersToLink = new List<Customer>();
             var skipCount = 0;
             var rowIdx = 1;
 
@@ -220,30 +237,49 @@ namespace ErpBackend.Controllers
                 
                 if (string.IsNullOrEmpty(name)) continue;
 
-                // Kiểm tra trùng trong DB hoặc trong list sắp add
-                if ((!string.IsNullOrEmpty(phone) && await _context.Customers.AnyAsync(c => c.Phone == phone)) ||
-                    newCustomers.Any(nc => nc.Phone == phone))
+                // Kiểm tra xem khách hàng đã tồn tại chưa (IgnoreQueryFilters để tìm xuyên chi nhánh)
+                var existing = await _context.Customers
+                    .IgnoreQueryFilters()
+                    .Include(c => c.CustomerBranches)
+                    .FirstOrDefaultAsync(c => !string.IsNullOrEmpty(phone) && c.Phone == phone);
+
+                if (existing != null)
+                {
+                    existingCustomersToLink.Add(existing);
+                    continue;
+                }
+
+                // Kiểm tra trùng trong danh sách đang xử lý
+                if (newCustomers.Any(nc => !string.IsNullOrEmpty(phone) && nc.Phone == phone))
                 {
                     skipCount++;
                     continue;
                 }
 
-                newCustomers.Add(new Customer
+                var customer = new Customer
                 {
-                    CustomerCode = $"KH-IMP-{DateTime.Now:HHmmss}-{rowIdx}",
                     Name = name,
                     Phone = phone,
                     Email = row.Cell(3).GetValue<string>(),
                     Address = row.Cell(4).GetValue<string>(),
                     TaxId = row.Cell(5).GetValue<string>(),
                     CreatedAt = DateTime.UtcNow
-                });
+                };
+
+                // Tự động sinh mã
+                var count = (await _context.Customers.IgnoreQueryFilters().CountAsync()) + newCustomers.Count;
+                customer.CustomerCode = $"KH{DateTime.Now:yyyyMMdd}{count + 1:D3}";
+
+                newCustomers.Add(customer);
             }
 
-            if (newCustomers.Any())
+            if (newCustomers.Any() || existingCustomersToLink.Any())
             {
-                _context.Customers.AddRange(newCustomers);
-                await _context.SaveChangesAsync();
+                if (newCustomers.Any())
+                {
+                    _context.Customers.AddRange(newCustomers);
+                    await _context.SaveChangesAsync();
+                }
 
                 // Liên kết với chi nhánh
                 var branchIds = new List<int>();
@@ -253,12 +289,12 @@ namespace ErpBackend.Controllers
                 }
                 else if (_currentUser.IsAdmin)
                 {
-                    // Admin import thì gán vào tất cả chi nhánh hiện có
                     branchIds = await _context.Branches.Select(b => b.Id).ToListAsync();
                 }
 
                 if (branchIds.Any())
                 {
+                    // Xử lý khách hàng mới
                     foreach (var nc in newCustomers)
                     {
                         foreach (var bId in branchIds)
@@ -266,11 +302,24 @@ namespace ErpBackend.Controllers
                             _context.CustomerBranches.Add(new CustomerBranch { CustomerId = nc.Id, BranchId = bId });
                         }
                     }
+
+                    // Xử lý khách hàng cũ (chỉ link nếu chưa có)
+                    foreach (var ec in existingCustomersToLink)
+                    {
+                        foreach (var bId in branchIds)
+                        {
+                            var alreadyLinked = ec.CustomerBranches.Any(cb => cb.BranchId == bId);
+                            if (!alreadyLinked)
+                            {
+                                _context.CustomerBranches.Add(new CustomerBranch { CustomerId = ec.Id, BranchId = bId });
+                            }
+                        }
+                    }
                     await _context.SaveChangesAsync();
                 }
             }
 
-            return Ok(new { count = newCustomers.Count, skipped = skipCount });
+            return Ok(new { count = newCustomers.Count, linked = existingCustomersToLink.Count, skipped = skipCount });
         }
 
         private bool CustomerExists(int id)
