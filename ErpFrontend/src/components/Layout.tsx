@@ -16,10 +16,10 @@ export const Layout: React.FC = () => {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Products', path: '/products', icon: <Package size={20} /> },
+    { name: 'Customers', path: '/customers', icon: <Users size={20} /> },
     { name: 'Create Invoice', path: '/invoice/new', icon: <FileText size={20} /> },
     { name: 'Reports', path: '/reports', icon: <BarChart3 size={20} /> },
-    { name: 'Lịch Sử', path: '/history', icon: <Clock size={20} /> },
-    { name: 'Khách hàng', path: '/customers', icon: <Users size={20} /> },
+    { name: 'History', path: '/history', icon: <Clock size={20} /> },
   ];
 
   return (
@@ -73,14 +73,14 @@ export const Layout: React.FC = () => {
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Topbar */}
         <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 z-10">
-          <h2 className="text-lg font-semibold text-slate-800">Cổng Vibe</h2>
+          <h2 className="text-lg font-semibold text-slate-800">Vibe Hub</h2>
           <div className="flex items-center gap-4">
             <AlertBell />
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
             </span>
-            <span className="text-sm font-medium text-slate-600">Hệ thống đang hoạt động</span>
+            <span className="text-sm font-medium text-slate-600">System Online</span>
           </div>
         </header>
 
