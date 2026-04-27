@@ -36,7 +36,11 @@ namespace ErpBackend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customers
+                .Include(c => c.CustomerBranches)
+                    .ThenInclude(cb => cb.Branch)
+                .FirstOrDefaultAsync(c => c.Id == id);
+            
             if (customer == null) return NotFound();
             return customer;
         }
@@ -62,10 +66,8 @@ namespace ErpBackend.Controllers
             }
 
             customer.CreatedAt = DateTime.UtcNow;
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
-
-            // Xử lý chi nhánh
+            
+            // Xác định chi nhánh trước khi lưu
             var branchIdsToAssign = new List<int>();
             if (customer.BranchIds != null && customer.BranchIds.Any())
             {
@@ -78,8 +80,10 @@ namespace ErpBackend.Controllers
 
             foreach (var bId in branchIdsToAssign)
             {
-                _context.CustomerBranches.Add(new CustomerBranch { CustomerId = customer.Id, BranchId = bId });
+                customer.CustomerBranches.Add(new CustomerBranch { BranchId = bId });
             }
+
+            _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
@@ -90,26 +94,28 @@ namespace ErpBackend.Controllers
         {
             if (id != customer.Id) return BadRequest();
 
-            _context.Entry(customer).State = EntityState.Modified;
+            var existing = await _context.Customers
+                .Include(c => c.CustomerBranches)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (existing == null) return NotFound();
+
+            // Cập nhật thông tin cơ bản
+            _context.Entry(existing).CurrentValues.SetValues(customer);
+
+            // Cập nhật chi nhánh nếu có gửi lên (thường là Admin)
+            if (customer.BranchIds != null)
+            {
+                existing.CustomerBranches.Clear();
+                foreach (var bId in customer.BranchIds)
+                {
+                    existing.CustomerBranches.Add(new CustomerBranch { BranchId = bId });
+                }
+            }
 
             try
             {
                 await _context.SaveChangesAsync();
-
-                // Cập nhật chi nhánh nếu có gửi lên (thường là Admin)
-                if (customer.BranchIds != null)
-                {
-                    var existingBranches = await _context.CustomerBranches
-                        .Where(cb => cb.CustomerId == id)
-                        .ToListAsync();
-                    _context.CustomerBranches.RemoveRange(existingBranches);
-
-                    foreach (var bId in customer.BranchIds)
-                    {
-                        _context.CustomerBranches.Add(new CustomerBranch { CustomerId = id, BranchId = bId });
-                    }
-                    await _context.SaveChangesAsync();
-                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -214,12 +220,26 @@ namespace ErpBackend.Controllers
                 _context.Customers.AddRange(newCustomers);
                 await _context.SaveChangesAsync();
 
-                // Liên kết với chi nhánh người import
+                // Liên kết với chi nhánh
+                var branchIds = new List<int>();
                 if (_currentUser.BranchId.HasValue)
+                {
+                    branchIds.Add(_currentUser.BranchId.Value);
+                }
+                else if (_currentUser.IsAdmin)
+                {
+                    // Admin import thì gán vào tất cả chi nhánh hiện có
+                    branchIds = await _context.Branches.Select(b => b.Id).ToListAsync();
+                }
+
+                if (branchIds.Any())
                 {
                     foreach (var nc in newCustomers)
                     {
-                        _context.CustomerBranches.Add(new CustomerBranch { CustomerId = nc.Id, BranchId = _currentUser.BranchId.Value });
+                        foreach (var bId in branchIds)
+                        {
+                            _context.CustomerBranches.Add(new CustomerBranch { CustomerId = nc.Id, BranchId = bId });
+                        }
                     }
                     await _context.SaveChangesAsync();
                 }

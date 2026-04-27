@@ -47,6 +47,16 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<GroupPermission>().HasKey(gp => new { gp.GroupId, gp.PermissionId });
         modelBuilder.Entity<CustomerBranch>().HasKey(cb => new { cb.CustomerId, cb.BranchId });
 
+        modelBuilder.Entity<CustomerBranch>()
+            .HasOne(cb => cb.Customer)
+            .WithMany(c => c.CustomerBranches)
+            .HasForeignKey(cb => cb.CustomerId);
+
+        modelBuilder.Entity<CustomerBranch>()
+            .HasOne(cb => cb.Branch)
+            .WithMany()
+            .HasForeignKey(cb => cb.BranchId);
+
         // Row-Level Security (RLS) simulation via Global Query Filters
         // If Admin, see everything. If User, see only their branch.
         modelBuilder.Entity<Invoice>().HasQueryFilter(i => 
