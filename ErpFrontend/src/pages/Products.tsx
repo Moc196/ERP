@@ -300,7 +300,7 @@ export const Products: React.FC = () => {
                         <div className="text-[10px] text-slate-400 mt-2 flex flex-wrap justify-end gap-1">
                           {p.branchStocks.map(bs => (
                             <span key={bs.branchId} className="bg-slate-100/50 text-slate-500 px-2 py-0.5 rounded-md border border-slate-200/50 whitespace-nowrap font-medium">
-                              {bs.branch?.name?.replace('Chi nhánh ', '') || `Kho ${bs.branchId}`}: <span className="text-indigo-600 font-bold">{bs.quantity}</span>
+                              {bs.branch?.name?.replace(/chi nhánh\s+/i, '') || `Kho ${bs.branchId}`}: <span className="text-indigo-600 font-bold">{bs.quantity}</span>
                             </span>
                           ))}
                         </div>
@@ -466,29 +466,29 @@ export const Products: React.FC = () => {
             <div className="space-y-4">
               {role === 'Admin' && (
                 <div>
-                  <label className="text-sm font-bold text-slate-600 block mb-2">Từ chi nhánh</label>
+                  <label className="text-sm font-bold text-slate-600 block mb-2">Từ</label>
                   <select 
                     value={transferFromBranch}
                     onChange={e => setTransferFromBranch(e.target.value)}
                     className="w-full border border-slate-200 rounded-xl py-3 px-4 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-300"
                   >
-                    <option value="">-- Chọn chi nhánh nguồn --</option>
+                    <option value="">-- Chọn nguồn --</option>
                     {branches.map(b => (
-                      <option key={b.id} value={b.id}>{b.name}</option>
+                      <option key={b.id} value={b.id}>{b.name.replace(/chi nhánh\s+/i, '')}</option>
                     ))}
                   </select>
                 </div>
               )}
               <div>
-                <label className="text-sm font-bold text-slate-600 block mb-2">Đến chi nhánh</label>
+                <label className="text-sm font-bold text-slate-600 block mb-2">Đến</label>
                 <select 
                   value={transferToBranch}
                   onChange={e => setTransferToBranch(e.target.value)}
                   className="w-full border border-slate-200 rounded-xl py-3 px-4 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-300"
                 >
-                  <option value="">-- Chọn chi nhánh đích --</option>
+                  <option value="">-- Chọn đích --</option>
                   {branches.map(b => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
+                    <option key={b.id} value={b.id}>{b.name.replace(/chi nhánh\s+/i, '')}</option>
                   ))}
                 </select>
               </div>

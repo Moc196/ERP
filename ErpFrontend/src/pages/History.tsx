@@ -190,7 +190,7 @@ export const History: React.FC = () => {
             <table className="w-full">
               <thead className="bg-slate-50">
                 <tr>
-                {['Thời gian', 'Chi nhánh', 'Sản phẩm', 'Loại', 'Số lượng', 'Tham chiếu', ...((role === 'Admin' || role === 'Manager') ? ['Người thực hiện'] : [])].map(h => (
+                {['Thời gian', 'Kho', 'Sản phẩm', 'Loại', 'Số lượng', 'Tham chiếu', ...((role === 'Admin' || role === 'Manager') ? ['Người thực hiện'] : [])].map(h => (
                     <th key={h} className="text-left text-xs font-bold text-slate-500 uppercase px-6 py-3">{h}</th>
                   ))}
                 </tr>
@@ -203,7 +203,7 @@ export const History: React.FC = () => {
                 ) : stockLogs.map(log => (
                   <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-6 py-3 text-sm text-slate-500 whitespace-nowrap">{fmtDate(log.createdAt)}</td>
-                    <td className="px-6 py-3 text-sm font-semibold text-indigo-600 whitespace-nowrap">{log.branchName}</td>
+                    <td className="px-6 py-3 text-sm font-semibold text-indigo-600 whitespace-nowrap">{log.branchName.replace(/chi nhánh\s+/i, '')}</td>
                     <td className="px-6 py-3 font-medium text-slate-800">{log.productName}</td>
                     <td className="px-6 py-3">
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
@@ -472,8 +472,8 @@ export const History: React.FC = () => {
                   <tr key={tx.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-6 py-3 text-sm text-slate-500 whitespace-nowrap">{fmtDate(tx.createdAt)}</td>
                     <td className="px-6 py-3 font-medium text-slate-800">{tx.productName}</td>
-                    <td className="px-6 py-3 text-sm text-orange-600 font-semibold">{tx.fromBranchName}</td>
-                    <td className="px-6 py-3 text-sm text-emerald-600 font-semibold">{tx.toBranchName}</td>
+                    <td className="px-6 py-3 text-sm text-orange-600 font-semibold">{tx.fromBranchName.replace(/chi nhánh\s+/i, '')}</td>
+                    <td className="px-6 py-3 text-sm text-emerald-600 font-semibold">{tx.toBranchName.replace(/chi nhánh\s+/i, '')}</td>
                     <td className="px-6 py-3 font-bold text-slate-700">{tx.quantity}</td>
                     <td className="px-6 py-3">
                       <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full">
