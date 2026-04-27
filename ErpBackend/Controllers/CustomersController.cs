@@ -48,25 +48,50 @@ namespace ErpBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<Customer>> CreateCustomer(Customer customer)
         {
-            // Kiểm tra trùng SĐT
-            if (!string.IsNullOrEmpty(customer.Phone) && await _context.Customers.AnyAsync(c => c.Phone == customer.Phone))
-            {
-                return BadRequest(new { error = "Số điện thoại này đã tồn tại trong hệ thống!" });
-            }
+            // Kiểm tra xem khách hàng đã tồn tại trong hệ thống chưa (bất kể chi nhánh nào) theo Số điện thoại
+            var existingCustomer = await _context.Customers
+                .IgnoreQueryFilters()
+                .Include(c => c.CustomerBranches)
+                .FirstOrDefaultAsync(c => !string.IsNullOrEmpty(customer.Phone) && c.Phone == customer.Phone);
 
-            // Tự động sinh mã nếu trống
-            if (string.IsNullOrEmpty(customer.CustomerCode))
+            if (existingCustomer != null)
             {
-                var count = await _context.Customers.CountAsync();
-                customer.CustomerCode = $"KH{DateTime.Now:yyyyMMdd}{count + 1:D3}";
-            }
-            else if (await _context.Customers.AnyAsync(c => c.CustomerCode == customer.CustomerCode))
-            {
-                return BadRequest(new { error = "Mã khách hàng này đã tồn tại!" });
+                // Nếu đã tồn tại, kiểm tra xem đã có ở chi nhánh này chưa
+                var targetBranchId = customer.BranchIds?.FirstOrDefault() ?? _currentUser.BranchId;
+
+                if (targetBranchId.HasValue)
+                {
+                    var alreadyLinked = existingCustomer.CustomerBranches.Any(cb => cb.BranchId == targetBranchId.Value);
+                    if (!alreadyLinked)
+                    {
+                        _context.CustomerBranches.Add(new CustomerBranch 
+                        { 
+                            CustomerId = existingCustomer.Id, 
+                            BranchId = targetBranchId.Value 
+                        });
+                        await _context.SaveChangesAsync();
+                        return Ok(existingCustomer); // Trả về khách hàng hiện tại
+                    }
+                    else
+                    {
+                        return BadRequest(new { error = "Khách hàng này đã tồn tại ở chi nhánh này rồi!" });
+                    }
+                }
             }
 
             customer.CreatedAt = DateTime.UtcNow;
             
+            // Tự động sinh mã nếu trống
+            if (string.IsNullOrEmpty(customer.CustomerCode))
+            {
+                var count = await _context.Customers.IgnoreQueryFilters().CountAsync();
+                customer.CustomerCode = $"KH{DateTime.Now:yyyyMMdd}{count + 1:D3}";
+            }
+            else if (await _context.Customers.IgnoreQueryFilters().AnyAsync(c => c.CustomerCode == customer.CustomerCode))
+            {
+                return BadRequest(new { error = "Mã khách hàng này đã tồn tại!" });
+            }
+
             // Xác định chi nhánh trước khi lưu
             var branchIdsToAssign = new List<int>();
             if (customer.BranchIds != null && customer.BranchIds.Any())
