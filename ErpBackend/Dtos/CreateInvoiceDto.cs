@@ -2,6 +2,7 @@ namespace ErpBackend.Dtos;
 
 public class CreateInvoiceDto
 {
+    public int? CustomerId { get; set; }
     public string CustomerName { get; set; } = string.Empty;
     public string CurrencyCode { get; set; } = "VND";
     public List<InvoiceItemDto> Items { get; set; } = new();

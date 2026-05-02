@@ -13,11 +13,13 @@ public class StockController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly Services.ICurrentUserService _currentUserService;
+    private readonly Services.AccountingService _accountingService;
 
-    public StockController(AppDbContext context, Services.ICurrentUserService currentUserService)
+    public StockController(AppDbContext context, Services.ICurrentUserService currentUserService, Services.AccountingService accountingService)
     {
         _context = context;
         _currentUserService = currentUserService;
+        _accountingService = accountingService;
     }
 
     [Authorize(Policy = "stock.import")]
@@ -34,7 +36,16 @@ public class StockController : ControllerBase
             if (product == null)
                 return NotFound(new { error = $"Không tìm thấy sản phẩm ID: {dto.ProductId}" });
 
-            // Cập nhật tồn kho tại chi nhánh
+            // 1. Tính toán giá vốn bình quân gia quyền (Weighted Average Cost)
+            // Công thức: ((Tồn cũ * Giá vốn cũ) + (Số lượng mới * Giá nhập mới)) / Tổng tồn mới
+            int currentTotalStock = await _context.BranchStocks.Where(bs => bs.ProductId == product.Id).SumAsync(bs => bs.Quantity);
+            decimal totalValueBefore = currentTotalStock * product.CostPrice;
+            decimal importValue = dto.Quantity * dto.PurchasePrice;
+            
+            product.CostPrice = (totalValueBefore + importValue) / (currentTotalStock + dto.Quantity);
+            _context.Products.Update(product);
+
+            // 2. Cập nhật tồn kho tại chi nhánh
             // Nếu không phải Admin tổng, bắt buộc dùng chi nhánh của User
             var branchId = _currentUserService.IsAdmin ? 1 : (_currentUserService.BranchId ?? 1); 
             
@@ -63,6 +74,10 @@ public class StockController : ControllerBase
             };
 
             _context.StockTransactions.Add(stockTx);
+            await _context.SaveChangesAsync();
+
+            // Tự động hạch toán Nhập kho (Nợ 156 / Có 331) - Dùng Giá nhập thực tế
+            await _accountingService.AutoPostStockImportAsync(product, dto.Quantity, branchId, dto.PurchasePrice);
             await _context.SaveChangesAsync();
 
             // Chốt giao dịch

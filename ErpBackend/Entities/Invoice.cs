@@ -22,5 +22,8 @@ public class Invoice
     public int? BranchId { get; set; } // For RLS
     public virtual Branch? Branch { get; set; }
 
+    public int? CustomerId { get; set; }
+    public virtual Customer? Customer { get; set; }
+
     public List<InvoiceItem> Items { get; set; } = new();
 }

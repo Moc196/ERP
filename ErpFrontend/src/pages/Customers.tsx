@@ -28,6 +28,34 @@ interface Customer {
   taxId: string;
   customerBranches?: { branchId: number; branch?: { name: string } }[];
   branchIds?: number[];
+  totalDebt?: number;
+}
+
+interface CustomerHistory {
+  customerName: string;
+  totalDebt: number;
+  debtByBranch?: {
+    branchName: string;
+    debtAmount: number;
+  }[];
+  invoices: {
+    id: number;
+    invoiceNumber: string;
+    invoiceDate: string;
+    totalAmount: number;
+    paidAmount: number;
+    status: string;
+    currencyCode: string;
+    branchName: string;
+  }[];
+  payments: {
+    id: number;
+    invoiceNumber: string;
+    amount: number;
+    paymentDate: string;
+    paymentMethod: string;
+    processedBy: string;
+  }[];
 }
 
 interface Branch {
@@ -43,6 +71,12 @@ export const Customers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
+  
+  // Debt Ledger State
+  const [isLedgerModalOpen, setIsLedgerModalOpen] = useState(false);
+  const [ledgerData, setLedgerData] = useState<CustomerHistory | null>(null);
+  const [loadingLedger, setLoadingLedger] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -84,7 +118,26 @@ export const Customers: React.FC = () => {
       fetchCustomers();
     } catch (error: any) {
       console.error('Lỗi khi lưu khách hàng:', error);
-      alert(error.response?.data?.error || 'Không thể lưu khách hàng. Vui lòng kiểm tra lại!');
+      
+      // Xử lý xác nhận trùng SĐT
+      if (error.response?.status === 409 && error.response?.data?.error === 'DUPLICATE_PHONE') {
+        if (confirm(error.response.data.message)) {
+          try {
+            await axios.post('/customers?confirmDuplicate=true', currentCustomer);
+            setIsModalOpen(false);
+            fetchCustomers();
+            return;
+          } catch (retryError: any) {
+            alert(retryError.response?.data?.error || 'Không thể liên kết khách hàng. Vui lòng thử lại!');
+            return;
+          }
+        } else {
+          return; // Người dùng không đồng ý
+        }
+      }
+
+      const serverError = error.response?.data?.error || error.response?.data?.detail;
+      alert(serverError || 'Không thể lưu khách hàng. Vui lòng kiểm tra lại!');
     }
   };
 
@@ -143,6 +196,22 @@ export const Customers: React.FC = () => {
       ? currentIds.filter(id => id !== branchId)
       : [...currentIds, branchId];
     setCurrentCustomer({ ...currentCustomer, branchIds: newIds });
+  };
+
+  const openLedger = async (customerId: number) => {
+    setIsLedgerModalOpen(true);
+    setLoadingLedger(true);
+    setLedgerData(null);
+    try {
+      const response = await axios.get(`/customers/${customerId}/history`);
+      setLedgerData(response.data);
+    } catch (error) {
+      console.error('Lỗi khi tải sổ công nợ:', error);
+      alert('Không thể tải dữ liệu công nợ.');
+      setIsLedgerModalOpen(false);
+    } finally {
+      setLoadingLedger(false);
+    }
   };
 
   const filteredCustomers = customers.filter(c => 
@@ -220,6 +289,7 @@ export const Customers: React.FC = () => {
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Contact</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Address</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Total Debt</th>
                 {role === 'Admin' && <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Branches</th>}
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
@@ -227,11 +297,11 @@ export const Customers: React.FC = () => {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={role === 'Admin' ? 6 : 5} className="px-6 py-12 text-center text-slate-400 font-medium">Loading data...</td>
+                  <td colSpan={role === 'Admin' ? 7 : 6} className="px-6 py-12 text-center text-slate-400 font-medium">Loading data...</td>
                 </tr>
               ) : filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={role === 'Admin' ? 6 : 5} className="px-6 py-12 text-center text-slate-400">No customers found</td>
+                  <td colSpan={role === 'Admin' ? 7 : 6} className="px-6 py-12 text-center text-slate-400">No customers found</td>
                 </tr>
               ) : (
                 filteredCustomers.map((customer) => (
@@ -267,6 +337,11 @@ export const Customers: React.FC = () => {
                         <span className="truncate">{customer.address || '---'}</span>
                       </div>
                     </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className={`font-bold ${customer.totalDebt && customer.totalDebt > 0 ? 'text-rose-600' : 'text-slate-500'}`}>
+                        {customer.totalDebt ? customer.totalDebt.toLocaleString() + '₫' : '0₫'}
+                      </span>
+                    </td>
                     {role === 'Admin' && (
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
@@ -280,6 +355,13 @@ export const Customers: React.FC = () => {
                     )}
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
+                        <button 
+                          onClick={() => openLedger(customer.id!)}
+                          title="Sổ công nợ"
+                          className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-100 bg-white"
+                        >
+                          <Hash className="w-4 h-4" />
+                        </button>
                         <button 
                           onClick={() => {
                             setCurrentCustomer({
@@ -437,6 +519,116 @@ export const Customers: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Debt Ledger Modal */}
+      {isLedgerModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <Hash className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800">
+                    Sổ công nợ: {ledgerData?.customerName || '...'}
+                  </h3>
+                  <p className="text-sm text-slate-500">Chi tiết mua hàng và thanh toán</p>
+                </div>
+              </div>
+              <button onClick={() => setIsLedgerModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-white hover:bg-slate-100 p-2 rounded-full transition-colors shadow-sm">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto bg-slate-50/30 flex-1">
+              {loadingLedger ? (
+                <div className="text-center py-12 text-slate-400 font-medium">Đang tải dữ liệu...</div>
+              ) : ledgerData ? (
+                <div className="space-y-6">
+                  {/* Summary Card */}
+                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Tổng nợ hiện tại</p>
+                      <h4 className={`text-3xl font-bold ${ledgerData.totalDebt > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                        {ledgerData.totalDebt.toLocaleString()}₫
+                      </h4>
+                    </div>
+                    
+                    {/* Breakdown by Branch */}
+                    {ledgerData.debtByBranch && ledgerData.debtByBranch.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {ledgerData.debtByBranch.map(d => (
+                          <div key={d.branchName} className="bg-rose-50 border border-rose-100 px-4 py-2 rounded-xl text-right">
+                            <p className="text-xs font-bold text-rose-800/60 uppercase">{d.branchName}</p>
+                            <p className="font-bold text-rose-600">{d.debtAmount.toLocaleString()}₫</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Invoices */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                      <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+                        <h5 className="font-bold text-slate-800">Lịch sử Hóa đơn</h5>
+                      </div>
+                      <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
+                        {ledgerData.invoices.length === 0 ? (
+                          <div className="p-5 text-center text-slate-400">Chưa có hóa đơn nào</div>
+                        ) : ledgerData.invoices.map(inv => (
+                          <div key={inv.id} className="p-4 hover:bg-slate-50 transition-colors">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <span className="font-mono text-sm font-bold text-slate-700">{inv.invoiceNumber}</span>
+                                <span className="ml-2 text-xs font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-100">{inv.branchName}</span>
+                              </div>
+                              <span className="text-xs text-slate-400">{new Date(inv.invoiceDate).toLocaleDateString('vi-VN')}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-500">Tổng: <span className="font-bold text-slate-800">{inv.totalAmount.toLocaleString()}₫</span></span>
+                              <span className="text-slate-500">Đã trả: <span className="font-bold text-emerald-600">{inv.paidAmount.toLocaleString()}₫</span></span>
+                            </div>
+                            {inv.totalAmount > inv.paidAmount && (
+                              <div className="mt-2 text-right text-xs font-bold text-rose-500">
+                                Còn nợ: {(inv.totalAmount - inv.paidAmount).toLocaleString()}₫
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Payments */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                      <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+                        <h5 className="font-bold text-slate-800">Lịch sử Thanh toán</h5>
+                      </div>
+                      <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
+                        {ledgerData.payments.length === 0 ? (
+                          <div className="p-5 text-center text-slate-400">Chưa có thanh toán nào</div>
+                        ) : ledgerData.payments.map(pay => (
+                          <div key={pay.id} className="p-4 hover:bg-slate-50 transition-colors">
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="font-mono text-sm font-bold text-slate-700">Thanh toán cho: {pay.invoiceNumber}</span>
+                              <span className="text-xs text-slate-400">{new Date(pay.paymentDate).toLocaleDateString('vi-VN')}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="font-bold text-emerald-600">+{pay.amount.toLocaleString()}₫</span>
+                              <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">{pay.paymentMethod}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       )}

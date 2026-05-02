@@ -7,6 +7,7 @@ interface InvoiceItemForm { productId: number; quantity: number; productName: st
 
 export const CreateInvoice: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [customerId, setCustomerId] = useState<number | ''>('');
   const [customerName, setCustomerName] = useState('');
   const [items, setItems] = useState<InvoiceItemForm[]>([]);
   const [selectedProduct, setSelectedProduct] = useState('');
@@ -35,11 +36,12 @@ export const CreateInvoice: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!customerName || items.length === 0) { setError('Nhập tên khách và chọn ít nhất 1 sản phẩm!'); return; }
+    if ((customerId === '' && !customerName) || items.length === 0) { setError('Nhập tên khách và chọn ít nhất 1 sản phẩm!'); return; }
     setLoading(true); setError('');
     try {
       const res = await api.post('/invoices', {
-        customerName,
+        customerId: customerId === '' ? null : Number(customerId),
+        customerName: customerId === '' ? customerName || 'Khách lẻ' : customers.find(c => c.id === Number(customerId))?.name,
         currencyCode: currency,
         items: items.map(i => ({ productId: i.productId, quantity: i.quantity }))
       });
@@ -53,7 +55,9 @@ export const CreateInvoice: React.FC = () => {
         }))
       };
       setPrintInvoice(invoiceWithItems);
-      setCustomerName(''); setItems([]);
+      setCustomerName(''); 
+      setCustomerId('');
+      setItems([]);
     } catch (err: any) { setError(err.response?.data?.error || 'Lỗi tạo hóa đơn!'); }
     finally { setLoading(false); }
   };
@@ -70,20 +74,28 @@ export const CreateInvoice: React.FC = () => {
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-bold text-slate-600 block mb-2">Tên khách hàng</label>
-            <input 
-              list="customer-list"
-              type="text" 
-              value={customerName} 
-              onChange={e => setCustomerName(e.target.value)}
-              placeholder="Chọn hoặc nhập tên khách hàng..."
-              className="w-full border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            />
-            <datalist id="customer-list">
-              {customers.map(c => (
-                <option key={c.id} value={c.name}>{c.phone ? `SĐT: ${c.phone}` : ''}</option>
-              ))}
-            </datalist>
+            <label className="text-sm font-bold text-slate-600 block mb-2">Khách hàng</label>
+            <div className="flex gap-2">
+              <select 
+                value={customerId}
+                onChange={e => setCustomerId(e.target.value === '' ? '' : Number(e.target.value))}
+                className="flex-1 border border-slate-200 rounded-xl py-3 px-4 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              >
+                <option value="">Khách lẻ (Không lưu lịch sử nợ)</option>
+                {customers.map(c => (
+                  <option key={c.id} value={c.id}>{c.name} {c.phone ? `(${c.phone})` : ''}</option>
+                ))}
+              </select>
+              {customerId === '' && (
+                <input 
+                  type="text" 
+                  value={customerName} 
+                  onChange={e => setCustomerName(e.target.value)}
+                  placeholder="Nhập tên khách lẻ..."
+                  className="w-1/2 border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                />
+              )}
+            </div>
           </div>
           <div>
             <label className="text-sm font-bold text-slate-600 block mb-2">Tiền tệ</label>

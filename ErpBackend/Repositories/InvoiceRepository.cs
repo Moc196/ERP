@@ -12,12 +12,14 @@ public class InvoiceRepository : IInvoiceRepository
     private readonly AppDbContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly ExchangeRateService _exchangeRateService;
+    private readonly AccountingService _accountingService;
 
-    public InvoiceRepository(AppDbContext context, ICurrentUserService currentUserService, ExchangeRateService exchangeRateService)
+    public InvoiceRepository(AppDbContext context, ICurrentUserService currentUserService, ExchangeRateService exchangeRateService, AccountingService accountingService)
     {
         _context = context;
         _currentUserService = currentUserService;
         _exchangeRateService = exchangeRateService;
+        _accountingService = accountingService;
     }
 
     public async Task<IEnumerable<Invoice>> GetAllAsync()
@@ -38,12 +40,23 @@ public class InvoiceRepository : IInvoiceRepository
         {
             var invoice = new Invoice
             {
+                CustomerId = dto.CustomerId,
                 CustomerName = dto.CustomerName,
                 InvoiceDate = DateTime.UtcNow,
                 Status = "Unpaid",
                 CreatedBy = createdBy,
                 BranchId = _currentUserService.BranchId // Gán chi nhánh tự động từ user hiện tại
             };
+
+            // Nếu có ID khách hàng, tự động lấy tên chuẩn xác nhất từ DB
+            if (dto.CustomerId.HasValue)
+            {
+                var customer = await _context.Customers.FindAsync(dto.CustomerId.Value);
+                if (customer != null)
+                {
+                    invoice.CustomerName = customer.Name;
+                }
+            }
 
             // Sinh mã hóa đơn tự động (VD: HD001)
             var count = await _context.Invoices.CountAsync();
@@ -111,6 +124,14 @@ public class InvoiceRepository : IInvoiceRepository
 
             await _context.SaveChangesAsync();
 
+            // Tự động hạch toán kế toán (Nợ 131 / Có 511)
+            await _accountingService.AutoPostInvoiceAsync(invoice);
+
+            // Tự động hạch toán Giá vốn (Nợ 632 / Có 156)
+            await _accountingService.AutoPostCOGSAsync(invoice);
+
+            await _context.SaveChangesAsync();
+
             // Kể chuyện: Giao dịch thành công, chốt (Commit)!
             await transaction.CommitAsync();
 
@@ -164,6 +185,11 @@ public class InvoiceRepository : IInvoiceRepository
             };
 
             _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            // Tự động hạch toán kế toán (Nợ 111 / Có 131)
+            await _accountingService.AutoPostPaymentAsync(payment, invoice.CustomerName, invoice.BranchId);
+
             await _context.SaveChangesAsync();
 
             await transaction.CommitAsync();

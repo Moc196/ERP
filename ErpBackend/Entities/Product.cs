@@ -11,6 +11,7 @@ public class Product
     public string Name { get; set; } = string.Empty;
     public decimal PurchasePrice { get; set; } // Giá nhập
     public decimal Price { get; set; } // Giá bán
+    public decimal CostPrice { get; set; }
     public int MinStockThreshold { get; set; } = 5;
 
     private int? _initialStock;
@@ -24,4 +25,11 @@ public class Product
     
     [JsonPropertyName("branchStocks")]
     public List<BranchStock> BranchStocks { get; set; } = new();
+
+    // Accounting Links
+    public int? IncomeAccountId { get; set; }
+    public Account? IncomeAccount { get; set; }
+
+    public int? ExpenseAccountId { get; set; }
+    public Account? ExpenseAccount { get; set; }
 }

@@ -40,6 +40,7 @@ export const Products: React.FC = () => {
   // Restock modal state
   const [restockProduct, setRestockProduct] = useState<Product | null>(null);
   const [restockQty, setRestockQty] = useState(1);
+  const [restockPrice, setRestockPrice] = useState(0);
   const [restockNote, setRestockNote] = useState('');
   const [restockSaving, setRestockSaving] = useState(false);
   const [restockMsg, setRestockMsg] = useState('');
@@ -158,6 +159,7 @@ export const Products: React.FC = () => {
       const res = await api.post('/stock/import', {
         productId: restockProduct!.id,
         quantity: restockQty,
+        purchasePrice: restockPrice,
         note: restockNote || 'Nhập kho thủ công'
       });
       setRestockMsg(`✅ ${res.data.message} Tồn kho mới: ${res.data.newStock}`);
@@ -310,7 +312,7 @@ export const Products: React.FC = () => {
                   {(role === 'Admin' || role === 'Manager' || role === 'User') && (
                   <td className="px-6 py-4 text-center">
                     <button
-                      onClick={() => { setRestockProduct(p); setRestockQty(1); setRestockNote(''); setRestockMsg(''); }}
+                      onClick={() => { setRestockProduct(p); setRestockQty(1); setRestockPrice(p.purchasePrice || 0); setRestockNote(''); setRestockMsg(''); }}
                       className="text-emerald-500 hover:text-emerald-700 p-1.5 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                       title="Nhập thêm hàng"
                     >
@@ -408,15 +410,27 @@ export const Products: React.FC = () => {
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="text-sm font-bold text-slate-600 block mb-1.5">Số lượng nhập thêm</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={restockQty}
-                  onChange={e => setRestockQty(Math.max(1, Number(e.target.value)))}
-                  className="w-full border border-slate-200 rounded-xl py-3 px-4 text-center text-2xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-bold text-slate-600 block mb-1.5">Số lượng</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={restockQty}
+                    onChange={e => setRestockQty(Math.max(1, Number(e.target.value)))}
+                    className="w-full border border-slate-200 rounded-xl py-3 px-4 text-center text-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-slate-600 block mb-1.5">Giá nhập (₫)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={restockPrice}
+                    onChange={e => setRestockPrice(Number(e.target.value))}
+                    className="w-full border border-slate-200 rounded-xl py-3 px-4 text-center text-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                  />
+                </div>
               </div>
               <div>
                 <label className="text-sm font-bold text-slate-600 block mb-1.5">Ghi chú (tuỳ chọn)</label>

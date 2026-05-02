@@ -35,6 +35,12 @@ public class AppDbContext : DbContext
     public DbSet<Customer> Customers { get; set; }
     public DbSet<CustomerBranch> CustomerBranches { get; set; }
 
+    // Accounting
+    public DbSet<AccountType> AccountTypes { get; set; }
+    public DbSet<Account> Accounts { get; set; }
+    public DbSet<JournalEntry> JournalEntries { get; set; }
+    public DbSet<JournalEntryLine> JournalEntryLines { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Kích hoạt tự động tăng ID chuẩn PostgreSQL
@@ -97,6 +103,27 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<StockTransaction>().HasQueryFilter(st => 
             _currentUserService.IsAdmin || 
             st.BranchId == _currentUserService.BranchId);
+
+        // Accounting Configurations
+        modelBuilder.Entity<Account>()
+            .HasIndex(a => a.Code)
+            .IsUnique();
+
+        modelBuilder.Entity<Account>()
+            .HasOne(a => a.Parent)
+            .WithMany(a => a.Children)
+            .HasForeignKey(a => a.ParentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<JournalEntry>().HasQueryFilter(je => 
+            _currentUserService.IsAdmin || 
+            je.BranchId == _currentUserService.BranchId);
+
+        modelBuilder.Entity<JournalEntryLine>()
+            .HasOne(jl => jl.Account)
+            .WithMany(a => a.JournalEntryLines)
+            .HasForeignKey(jl => jl.AccountId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Seed Permissions
         modelBuilder.Entity<Permission>().HasData(
@@ -184,6 +211,26 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ExchangeRate>().HasData(
             new ExchangeRate { Id = 1, CurrencyCode = "USD", Rate = 25450.0m, Date = DateTime.UtcNow.Date },
             new ExchangeRate { Id = 2, CurrencyCode = "EUR", Rate = 27120.0m, Date = DateTime.UtcNow.Date }
+        );
+
+        // Seed AccountTypes
+        modelBuilder.Entity<AccountType>().HasData(
+            new AccountType { Id = 1, Name = "Tài sản (Asset)", NormalBalance = "Debit" },
+            new AccountType { Id = 2, Name = "Nợ phải trả (Liability)", NormalBalance = "Credit" },
+            new AccountType { Id = 3, Name = "Vốn chủ sở hữu (Equity)", NormalBalance = "Credit" },
+            new AccountType { Id = 4, Name = "Doanh thu (Revenue)", NormalBalance = "Credit" },
+            new AccountType { Id = 5, Name = "Chi phí (Expense)", NormalBalance = "Debit" }
+        );
+
+        // Seed Basic Accounts
+        modelBuilder.Entity<Account>().HasData(
+            new Account { Id = 1, Code = "111", Name = "Tiền mặt", AccountTypeId = 1 },
+            new Account { Id = 2, Code = "112", Name = "Tiền gửi ngân hàng", AccountTypeId = 1 },
+            new Account { Id = 3, Code = "131", Name = "Phải thu khách hàng", AccountTypeId = 1 },
+            new Account { Id = 4, Code = "156", Name = "Hàng hóa", AccountTypeId = 1 },
+            new Account { Id = 5, Code = "331", Name = "Phải trả người bán", AccountTypeId = 2 },
+            new Account { Id = 6, Code = "511", Name = "Doanh thu bán hàng", AccountTypeId = 4 },
+            new Account { Id = 7, Code = "632", Name = "Giá vốn hàng bán", AccountTypeId = 5 }
         );
     }
 }

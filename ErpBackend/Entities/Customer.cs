@@ -22,5 +22,8 @@ namespace ErpBackend.Entities
 
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
         public List<int>? BranchIds { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public decimal TotalDebt { get; set; }
     }
 }

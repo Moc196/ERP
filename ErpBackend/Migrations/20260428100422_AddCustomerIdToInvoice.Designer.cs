@@ -3,6 +3,7 @@ using System;
 using ErpBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,162 +12,16 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ErpBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428100422_AddCustomerIdToInvoice")]
+    partial class AddCustomerIdToInvoice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 .HasAnnotation("ProductVersion", "10.0.7");
-
-            modelBuilder.Entity("ErpBackend.Entities.Account", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AccountTypeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountTypeId");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("ParentId");
-
-                    b.ToTable("Accounts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AccountTypeId = 1,
-                            Code = "111",
-                            IsActive = true,
-                            Name = "Tiền mặt"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AccountTypeId = 1,
-                            Code = "112",
-                            IsActive = true,
-                            Name = "Tiền gửi ngân hàng"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            AccountTypeId = 1,
-                            Code = "131",
-                            IsActive = true,
-                            Name = "Phải thu khách hàng"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            AccountTypeId = 1,
-                            Code = "156",
-                            IsActive = true,
-                            Name = "Hàng hóa"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            AccountTypeId = 2,
-                            Code = "331",
-                            IsActive = true,
-                            Name = "Phải trả người bán"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            AccountTypeId = 4,
-                            Code = "511",
-                            IsActive = true,
-                            Name = "Doanh thu bán hàng"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            AccountTypeId = 5,
-                            Code = "632",
-                            IsActive = true,
-                            Name = "Giá vốn hàng bán"
-                        });
-                });
-
-            modelBuilder.Entity("ErpBackend.Entities.AccountType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NormalBalance")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AccountTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Tài sản (Asset)",
-                            NormalBalance = "Debit"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Nợ phải trả (Liability)",
-                            NormalBalance = "Credit"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Vốn chủ sở hữu (Equity)",
-                            NormalBalance = "Credit"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Doanh thu (Revenue)",
-                            NormalBalance = "Credit"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Chi phí (Expense)",
-                            NormalBalance = "Debit"
-                        });
-                });
 
             modelBuilder.Entity("ErpBackend.Entities.AlertNotification", b =>
                 {
@@ -344,14 +199,14 @@ namespace ErpBackend.Migrations
                         {
                             Id = 1,
                             CurrencyCode = "USD",
-                            Date = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2026, 4, 28, 0, 0, 0, 0, DateTimeKind.Utc),
                             Rate = 25450.0m
                         },
                         new
                         {
                             Id = 2,
                             CurrencyCode = "EUR",
-                            Date = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2026, 4, 28, 0, 0, 0, 0, DateTimeKind.Utc),
                             Rate = 27120.0m
                         });
                 });
@@ -645,64 +500,6 @@ namespace ErpBackend.Migrations
                     b.ToTable("InvoiceItems");
                 });
 
-            modelBuilder.Entity("ErpBackend.Entities.JournalEntry", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("BranchId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("EntryDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Reference")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
-
-                    b.ToTable("JournalEntries");
-                });
-
-            modelBuilder.Entity("ErpBackend.Entities.JournalEntryLine", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("Credit")
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<decimal>("Debit")
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<Guid>("JournalEntryId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("JournalEntryId");
-
-                    b.ToTable("JournalEntryLines");
-                });
-
             modelBuilder.Entity("ErpBackend.Entities.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -802,15 +599,6 @@ namespace ErpBackend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("CostPrice")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("ExpenseAccountId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("IncomeAccountId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("MinStockThreshold")
                         .HasColumnType("INTEGER");
 
@@ -828,10 +616,6 @@ namespace ErpBackend.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ExpenseAccountId");
-
-                    b.HasIndex("IncomeAccountId");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -1046,24 +830,6 @@ namespace ErpBackend.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ErpBackend.Entities.Account", b =>
-                {
-                    b.HasOne("ErpBackend.Entities.AccountType", "AccountType")
-                        .WithMany("Accounts")
-                        .HasForeignKey("AccountTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ErpBackend.Entities.Account", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("AccountType");
-
-                    b.Navigation("Parent");
-                });
-
             modelBuilder.Entity("ErpBackend.Entities.BranchStock", b =>
                 {
                     b.HasOne("ErpBackend.Entities.Branch", "Branch")
@@ -1155,36 +921,6 @@ namespace ErpBackend.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ErpBackend.Entities.JournalEntry", b =>
-                {
-                    b.HasOne("ErpBackend.Entities.Branch", "Branch")
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Branch");
-                });
-
-            modelBuilder.Entity("ErpBackend.Entities.JournalEntryLine", b =>
-                {
-                    b.HasOne("ErpBackend.Entities.Account", "Account")
-                        .WithMany("JournalEntryLines")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ErpBackend.Entities.JournalEntry", "JournalEntry")
-                        .WithMany("Lines")
-                        .HasForeignKey("JournalEntryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-
-                    b.Navigation("JournalEntry");
-                });
-
             modelBuilder.Entity("ErpBackend.Entities.Payment", b =>
                 {
                     b.HasOne("ErpBackend.Entities.Invoice", "Invoice")
@@ -1194,21 +930,6 @@ namespace ErpBackend.Migrations
                         .IsRequired();
 
                     b.Navigation("Invoice");
-                });
-
-            modelBuilder.Entity("ErpBackend.Entities.Product", b =>
-                {
-                    b.HasOne("ErpBackend.Entities.Account", "ExpenseAccount")
-                        .WithMany()
-                        .HasForeignKey("ExpenseAccountId");
-
-                    b.HasOne("ErpBackend.Entities.Account", "IncomeAccount")
-                        .WithMany()
-                        .HasForeignKey("IncomeAccountId");
-
-                    b.Navigation("ExpenseAccount");
-
-                    b.Navigation("IncomeAccount");
                 });
 
             modelBuilder.Entity("ErpBackend.Entities.StockTransaction", b =>
@@ -1274,18 +995,6 @@ namespace ErpBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ErpBackend.Entities.Account", b =>
-                {
-                    b.Navigation("Children");
-
-                    b.Navigation("JournalEntryLines");
-                });
-
-            modelBuilder.Entity("ErpBackend.Entities.AccountType", b =>
-                {
-                    b.Navigation("Accounts");
-                });
-
             modelBuilder.Entity("ErpBackend.Entities.Branch", b =>
                 {
                     b.Navigation("BranchStocks");
@@ -1306,11 +1015,6 @@ namespace ErpBackend.Migrations
             modelBuilder.Entity("ErpBackend.Entities.Invoice", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("ErpBackend.Entities.JournalEntry", b =>
-                {
-                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("ErpBackend.Entities.Permission", b =>

@@ -82,6 +82,7 @@ try
     builder.Services.AddScoped<AlertCheckerService>();
     builder.Services.AddScoped<PdfGeneratorService>();
     builder.Services.AddScoped<ExchangeRateService>();
+    builder.Services.AddScoped<AccountingService>();
     builder.Services.AddMemoryCache();
     builder.Services.AddHostedService<AlertBackgroundService>();
 

@@ -94,7 +94,7 @@ public class AuthController : ControllerBase
 
         if (user.BranchId.HasValue)
         {
-            claims.Add(new Claim("BranchId", user.BranchId.Value.ToString()));
+            claims.Add(new Claim("branchId", user.BranchId.Value.ToString()));
         }
 
         // Add permission claims

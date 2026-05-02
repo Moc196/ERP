@@ -174,6 +174,34 @@ export const AlertBell: React.FC = () => {
               ))
             )}
           </div>
+
+          {/* Footer - Admin Tests */}
+          {role === 'Admin' && (
+            <div className="bg-slate-50 p-3 flex gap-2 border-t border-slate-100">
+              <button
+                onClick={async () => {
+                  try {
+                    await api.post('/alerts/test-email');
+                    alert('Đã gửi test email!');
+                  } catch (err) { alert('Lỗi: ' + err); }
+                }}
+                className="flex-1 text-[10px] font-bold bg-white border border-slate-200 py-2 rounded-lg hover:bg-slate-50 text-slate-600 cursor-pointer"
+              >
+                📧 Test Email
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await api.post('/alerts/test-telegram');
+                    alert('Đã gửi test telegram!');
+                  } catch (err) { alert('Lỗi: ' + err); }
+                }}
+                className="flex-1 text-[10px] font-bold bg-white border border-slate-200 py-2 rounded-lg hover:bg-slate-50 text-slate-600 cursor-pointer"
+              >
+                📱 Test Telegram
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

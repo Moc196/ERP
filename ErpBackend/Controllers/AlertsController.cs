@@ -80,4 +80,15 @@ public class AlertsController : ControllerBase
         );
         return Ok(new { message = "Đã gửi test email. Kiểm tra hộp thư của bạn (có thể vào Spam)." });
     }
+
+    // Admin: test gửi telegram thủ công
+    [Authorize(Roles = "Admin")]
+    [HttpPost("test-telegram")]
+    public async Task<IActionResult> TestTelegram([FromServices] TelegramNotifier telegram)
+    {
+        await telegram.SendAsync(
+            "🚀 ERP.Vibe: Đây là tin nhắn kiểm tra kết nối Telegram!\nNếu bạn thấy tin nhắn này, hệ thống thông báo đã được cấu hình chính xác."
+        );
+        return Ok(new { message = "Đã gửi test telegram. Hãy kiểm tra ứng dụng Telegram của bạn." });
+    }
 }
