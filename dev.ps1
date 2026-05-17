@@ -1,4 +1,4 @@
-Write-Host "🚀 Đang dọn dẹp và khởi động ERP.Vibe (Development Mode)..." -ForegroundColor Cyan
+Write-Host "🚀 Đang dọn dẹp và khởi động ERP (Development Mode)..." -ForegroundColor Cyan
 
 # Tắt các process cũ để tránh lỗi "Address already in use"
 taskkill /F /IM ErpBackend.exe /T 2>$null

@@ -141,7 +141,7 @@ public class InvoicesController : ControllerBase
                         <div>Tiền tệ: {invoice.CurrencyCode}</div>
                     </div>
                     <div style='text-align: right;'>
-                        <div style='font-weight: bold;'>Cửa Hàng ERP.Vibe</div>
+                        <div style='font-weight: bold;'>Cửa Hàng ERP</div>
                         <div>Địa chỉ: 123 Đường ABC, Hà Nội</div>
                         <div>SĐT: 0123 456 789</div>
                     </div>
@@ -178,7 +178,7 @@ public class InvoicesController : ControllerBase
 
                 <div class='footer'>
                     Cảm ơn quý khách đã tin tưởng và sử dụng dịch vụ của chúng tôi!<br/>
-                    Hóa đơn này được tạo tự động bởi hệ thống ERP.Vibe
+                    Hóa đơn này được tạo tự động bởi hệ thống ERP
                 </div>
             </div>
         </body>

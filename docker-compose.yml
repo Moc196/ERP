@@ -12,9 +12,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/app.db
-      - Jwt__Key=SuperSecretKeyForVibeCoding2024!
-      - Jwt__Issuer=ErpVibeApp
-      - Jwt__Audience=ErpVibeUsers
+      - Jwt__Key=SuperSecretKeyForERPCoding2024!
+      - Jwt__Issuer=ErpApp
+      - Jwt__Audience=ErpUsers
     volumes:
       - erp_data:/app/data
       - erp_logs:/app/logs

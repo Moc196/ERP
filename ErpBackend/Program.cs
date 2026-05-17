@@ -28,7 +28,7 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 try
 {
-    Log.Information("🚀 ERP.Vibe API đang khởi động...");
+    Log.Information("🚀 ERP API đang khởi động...");
 
     var builder = WebApplication.CreateBuilder(args);
 
@@ -48,7 +48,7 @@ try
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
-            policy.WithOrigins("https://erp-frontend-vibe.onrender.com", "http://localhost:5173")
+            policy.WithOrigins("https://erp-frontend.onrender.com", "http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());
@@ -149,7 +149,7 @@ try
     app.UseAuthorization();
     app.MapControllers();
 
-    Log.Information("✅ ERP.Vibe API chạy tại http://localhost:5013");
+    Log.Information("✅ ERP API chạy tại http://localhost:5013");
     app.Run();
 }
 catch (Exception ex)

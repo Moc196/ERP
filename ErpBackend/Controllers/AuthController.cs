@@ -67,7 +67,7 @@ public class AuthController : ControllerBase
         var user = new User
         {
             Username = dto.Username,
-            Password = dto.Password, // Demo vibe code: no hash
+            Password = dto.Password, // Demo ERP code: no hash
             Role = dto.Role,
             BranchId = dto.Role == "Sales" ? 1 : null // Mặc định cho demo
         };

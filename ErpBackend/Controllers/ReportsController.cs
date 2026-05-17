@@ -19,7 +19,7 @@ public class ReportsController : ControllerBase
     {
         _context = context;
         // EPPlus v8+ dùng cách mới này thay vì LicenseContext cũ (đã deprecated)
-        ExcelPackage.License.SetNonCommercialPersonal("ERP.Vibe");
+        ExcelPackage.License.SetNonCommercialPersonal("ERP");
     }
 
     [HttpGet("revenue")]

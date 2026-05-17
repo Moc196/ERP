@@ -37,7 +37,7 @@ public class EmailNotifier
             var message = new MimeMessage();
             message.From.Add(MailboxAddress.Parse(username));
             message.To.Add(MailboxAddress.Parse(to));
-            message.Subject = $"[ERP.Vibe Alert] {subject}";
+            message.Subject = $"[ERP Alert] {subject}";
             message.Body = new TextPart("plain") { Text = body };
 
             using var smtp = new SmtpClient();

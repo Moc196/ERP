@@ -34,7 +34,7 @@ export const Login: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/50 p-10 transform transition-all">
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-transparent mb-2 tracking-tight">ERP.Vibe</h1>
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-transparent mb-2 tracking-tight">ERP</h1>
             <p className="text-slate-500 font-medium">Hệ thống Quản lý Kế toán Hiện đại</p>
           </div>
 

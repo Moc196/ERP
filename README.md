@@ -1,6 +1,6 @@
-# 🚀 ERP.Vibe — Hệ thống Quản lý Kế toán
+# 🚀 ERP — Hệ thống Quản lý Kế toán
 
-> **Vibe code, chạy là thấy, đóng gói xịn sò.**  
+> **ERP code, chạy là thấy, đóng gói xịn sò.**  
 > Full-stack ERP system cho doanh nghiệp bán sản phẩm, xây bằng .NET 8 Web API + React + SQLite.
 
 ---
@@ -179,4 +179,4 @@ curl http://localhost:5013/api/reports/revenue \
 
 ---
 
-*Built with ❤️ and Vibe Coding energy — April 2026*
+*Built with ❤️ and ERP Coding energy — April 2026*

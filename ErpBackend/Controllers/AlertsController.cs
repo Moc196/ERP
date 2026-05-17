@@ -76,7 +76,7 @@ public class AlertsController : ControllerBase
     {
         await email.SendAsync(
             "Test kết nối email",
-            "ERP.Vibe Alert System đang hoạt động!\n\nNếu bạn nhận được email này, hệ thống gửi thông báo email đã được cấu hình đúng."
+            "ERP Alert System đang hoạt động!\n\nNếu bạn nhận được email này, hệ thống gửi thông báo email đã được cấu hình đúng."
         );
         return Ok(new { message = "Đã gửi test email. Kiểm tra hộp thư của bạn (có thể vào Spam)." });
     }
@@ -87,7 +87,7 @@ public class AlertsController : ControllerBase
     public async Task<IActionResult> TestTelegram([FromServices] TelegramNotifier telegram)
     {
         await telegram.SendAsync(
-            "🚀 ERP.Vibe: Đây là tin nhắn kiểm tra kết nối Telegram!\nNếu bạn thấy tin nhắn này, hệ thống thông báo đã được cấu hình chính xác."
+            "🚀 ERP: Đây là tin nhắn kiểm tra kết nối Telegram!\nNếu bạn thấy tin nhắn này, hệ thống thông báo đã được cấu hình chính xác."
         );
         return Ok(new { message = "Đã gửi test telegram. Hãy kiểm tra ứng dụng Telegram của bạn." });
     }

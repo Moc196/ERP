@@ -188,7 +188,7 @@ export const CreateInvoice: React.FC = () => {
 
             {/* Header */}
             <div className="text-center mb-6 pb-6 border-b-2 border-dashed border-slate-200">
-              <p className="text-2xl font-extrabold text-indigo-700 tracking-tight">ERP.Vibe</p>
+              <p className="text-2xl font-extrabold text-indigo-700 tracking-tight">ERP</p>
               <p className="text-slate-400 text-xs uppercase tracking-widest mt-0.5">Hóa đơn bán hàng</p>
               <p className="font-mono font-extrabold text-2xl text-slate-800 mt-2">{printInvoice.invoiceNumber}</p>
             </div>
@@ -241,7 +241,7 @@ export const CreateInvoice: React.FC = () => {
             {/* Footer */}
             <div className="text-center mt-8 pt-6 border-t border-dashed border-slate-200">
               <p className="text-slate-400 text-sm">Cảm ơn quý khách! Hẹn gặp lại 🙏</p>
-              <p className="text-xs text-slate-300 mt-1">Powered by ERP.Vibe</p>
+              <p className="text-xs text-slate-300 mt-1">Powered by ERP</p>
             </div>
           </div>
         </div>

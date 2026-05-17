@@ -48,17 +48,58 @@ public class ProductsController : ControllerBase
 
         try 
         {
-            // Kiểm tra trùng tên
-            if (await _context.Products.AnyAsync(p => p.Name == product.Name))
+            var branchId = _currentUserService.BranchId ?? 1;
+
+            // Kiểm tra xem sản phẩm đã tồn tại trong hệ thống chưa (dựa vào tên)
+            // Dùng so sánh chính xác (==) để tránh lỗi SQLite LOWER() với tiếng Việt
+            var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == product.Name);
+            
+            if (existingProduct != null)
             {
-                return BadRequest(new { error = "Tên sản phẩm này đã tồn tại!" });
+                // Kiểm tra xem sản phẩm đã có ở chi nhánh này chưa
+                var existingStock = await _context.BranchStocks.FirstOrDefaultAsync(bs => bs.ProductId == existingProduct.Id && bs.BranchId == branchId);
+                
+                var additionalStock = product.Stock;
+
+                if (existingStock != null)
+                {
+                    // Nếu đã có, cộng dồn tồn kho
+                    existingStock.Quantity += additionalStock;
+                }
+                else
+                {
+                    // Nếu chưa có, tạo liên kết BranchStock cho chi nhánh này
+                    _context.BranchStocks.Add(new BranchStock
+                    {
+                        ProductId = existingProduct.Id,
+                        BranchId = branchId,
+                        Quantity = additionalStock > 0 ? additionalStock : 0
+                    });
+                }
+
+                if (additionalStock > 0)
+                {
+                    _context.StockTransactions.Add(new StockTransaction
+                    {
+                        ProductId = existingProduct.Id,
+                        Quantity = additionalStock,
+                        Type = existingStock != null ? "Import" : "Initial",
+                        ReferenceId = existingStock != null ? $"ADD_STOCK_{DateTime.Now:yyyyMMddHHmmss}" : "INITIAL_STOCK",
+                        CreatedBy = User.Identity?.Name ?? "admin",
+                        CreatedAt = DateTime.UtcNow,
+                        BranchId = branchId
+                    });
+                }
+                
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetProduct), new { id = existingProduct.Id }, existingProduct);
             }
 
             // Tự động sinh mã nếu trống
             if (string.IsNullOrEmpty(product.ProductCode))
             {
-                var count = await _context.Products.CountAsync();
-                product.ProductCode = $"SP{DateTime.Now:yyyyMMdd}{count + 1:D3}";
+                var maxId = await _context.Products.MaxAsync(p => (int?)p.Id) ?? 0;
+                product.ProductCode = $"SP{DateTime.Now:yyyyMMdd}{maxId + 1:D3}";
             }
             else if (await _context.Products.AnyAsync(p => p.ProductCode == product.ProductCode))
             {
@@ -69,19 +110,18 @@ public class ProductsController : ControllerBase
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            // Khởi tạo tồn kho ban đầu tại chi nhánh của người dùng (hoặc CN 1 mặc định)
-            var branchId = _currentUserService.BranchId ?? 1;
+            // Khởi tạo tồn kho ban đầu tại chi nhánh của người dùng
             var initialStock = product.Stock;
+
+            _context.BranchStocks.Add(new BranchStock
+            {
+                ProductId = product.Id,
+                BranchId = branchId,
+                Quantity = initialStock > 0 ? initialStock : 0
+            });
 
             if (initialStock > 0)
             {
-                _context.BranchStocks.Add(new BranchStock
-                {
-                    ProductId = product.Id,
-                    BranchId = branchId,
-                    Quantity = initialStock
-                });
-
                 // Ghi nhận log nhập kho
                 _context.StockTransactions.Add(new StockTransaction
                 {
@@ -93,9 +133,9 @@ public class ProductsController : ControllerBase
                     CreatedAt = DateTime.UtcNow,
                     BranchId = branchId
                 });
-
-                await _context.SaveChangesAsync();
             }
+
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
@@ -109,7 +149,7 @@ public class ProductsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
-        // Vibe code: For demo, just return Ok
+        // ERP code: For demo, just return Ok
         return Ok(new { message = $"Đã xóa sản phẩm ID {id}" });
     }
 
@@ -209,6 +249,13 @@ public class ProductsController : ControllerBase
                     {
                         existing = await _productRepository.GetByIdAsync(id);
                     }
+                    
+                    if (existing == null)
+                    {
+                        // Sửa lỗi SQLite không hỗ trợ ToLower() cho tiếng Việt (Unicode)
+                        // Nên dùng so sánh chính xác (exact match) để không bị lỗi UNIQUE constraint.
+                        existing = await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
+                    }
 
                     if (existing != null)
                     {
@@ -220,30 +267,40 @@ public class ProductsController : ControllerBase
                         // Cập nhật tồn kho tại chi nhánh
                         var branchId = _currentUserService.BranchId ?? 1;
                         var bs = await _context.BranchStocks.FirstOrDefaultAsync(x => x.ProductId == existing.Id && x.BranchId == branchId);
+                        
                         if (bs == null) {
                              bs = new BranchStock { ProductId = existing.Id, BranchId = branchId, Quantity = qty };
                              _context.BranchStocks.Add(bs);
                         } else {
-                             bs.Quantity += qty;
+                             bs.Quantity += qty; // Cộng dồn số lượng
                         }
 
-                        await _productRepository.UpdateAsync(existing);
+                        // KHÔNG GỌI UpdateAsync(existing) vì existing đã được EF Core theo dõi (tracked).
+                        // Gọi Update có thể gây lỗi InvalidOperationException hoặc DbUpdateException với tracking graph.
 
-                        _context.StockTransactions.Add(new StockTransaction
+                        if (qty > 0)
                         {
-                            ProductId = existing.Id,
-                            Quantity = qty,
-                            Type = "Import",
-                            ReferenceId = reference,
-                            CreatedBy = username,
-                            CreatedAt = DateTime.UtcNow
-                        });
+                            _context.StockTransactions.Add(new StockTransaction
+                            {
+                                ProductId = existing.Id,
+                                Quantity = qty,
+                                Type = "Import", // Luôn là nhập hàng mới
+                                ReferenceId = reference,
+                                CreatedBy = username,
+                                CreatedAt = DateTime.UtcNow,
+                                BranchId = branchId
+                            });
+                        }
                         updatedCount++;
                     }
                     else
                     {
+                        var maxId = await _context.Products.MaxAsync(p => (int?)p.Id) ?? 0;
+                        var productCode = $"SP{DateTime.Now:yyyyMMdd}{maxId + 1:D3}";
+
                         var product = new Product
                         {
+                            ProductCode = productCode,
                             Name = name,
                             PurchasePrice = purchasePrice,
                             Price = price,
@@ -260,15 +317,19 @@ public class ProductsController : ControllerBase
                             Quantity = qty 
                         });
 
-                        _context.StockTransactions.Add(new StockTransaction
+                        if (qty > 0)
                         {
-                            ProductId = added.Id,
-                            Quantity = qty,
-                            Type = "Import",
-                            ReferenceId = reference,
-                            CreatedBy = username,
-                            CreatedAt = DateTime.UtcNow
-                        });
+                            _context.StockTransactions.Add(new StockTransaction
+                            {
+                                ProductId = added.Id,
+                                Quantity = qty,
+                                Type = "Import",
+                                ReferenceId = reference,
+                                CreatedBy = username,
+                                CreatedAt = DateTime.UtcNow,
+                                BranchId = branchId
+                            });
+                        }
                         importedCount++;
                     }
                     
@@ -276,7 +337,8 @@ public class ProductsController : ControllerBase
                 }
                 catch (Exception ex)
                 {
-                    errors.Add($"Dòng {row.RowNumber()}: Lỗi dữ liệu ({ex.Message})");
+                    var inner = ex.InnerException != null ? $" - Chi tiết: {ex.InnerException.Message}" : "";
+                    errors.Add($"Dòng {row.RowNumber()}: Lỗi dữ liệu ({ex.Message}{inner})");
                 }
             }
 

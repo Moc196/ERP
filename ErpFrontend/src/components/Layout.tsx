@@ -29,7 +29,7 @@ export const Layout: React.FC = () => {
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10">
         <div className="h-16 flex items-center px-6 border-b border-slate-100">
           <div className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-transparent">
-            ERP.Vibe
+            ERP
           </div>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
@@ -74,7 +74,7 @@ export const Layout: React.FC = () => {
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Topbar */}
         <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 z-10">
-          <h2 className="text-lg font-semibold text-slate-800">Vibe Hub</h2>
+          <h2 className="text-lg font-semibold text-slate-800">ERP Hub</h2>
           <div className="flex items-center gap-4">
             <AlertBell />
             <span className="relative flex h-3 w-3">

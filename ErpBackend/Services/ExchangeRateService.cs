@@ -63,7 +63,7 @@ public class ExchangeRateService
     {
         try
         {
-            // For demo/Vibe: Using hardcoded logic with a bit of randomness to simulate live data
+            // For demo/ERP: Using hardcoded logic with a bit of randomness to simulate live data
             // In production: Use HttpClient to call VCB/SBV API
             
             decimal baseRate = currencyCode switch
